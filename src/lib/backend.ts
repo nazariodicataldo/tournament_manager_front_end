@@ -10,6 +10,7 @@ export type BackendResponse<T> =
       timestamp: string;
       message: string;
       data: T;
+      errors?: { [key: string]: string };
     };
 
 export async function myFetch<T>(input: RequestInfo | URL, init?: RequestInit) {
@@ -19,7 +20,9 @@ export async function myFetch<T>(input: RequestInfo | URL, init?: RequestInit) {
     const resJson: BackendResponse<T> = await res.json();
 
     if (!resJson.success) {
-      throw new Error(resJson.message);
+      const errors = "errors" in resJson ? resJson.errors : undefined;
+      const errorsValues = errors ? Object.values(errors).join(", ") : "";
+      throw new Error(resJson.message + (errors ? ": " + errorsValues : ""));
     }
 
     return resJson.data;

@@ -9,6 +9,7 @@ import TeamsList from "./features/team/TeamsList";
 import TournamentsList from "./features/tournament/TournamentsList";
 import TournamentPage from "./pages/TournamentPage";
 import PlayersList from "./features/player/PlayersList";
+import DialogContextProvider from "./contexts/DialogContext";
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <TournamentsList />
+            element: <TournamentsList />,
           },
           {
             path: "/tournaments/:id",
@@ -34,18 +35,22 @@ const router = createBrowserRouter([
       },
       {
         path: "/teams",
-        children: [{
-          index: true,
-          element: <TeamsList />
-        }],
+        children: [
+          {
+            index: true,
+            element: <TeamsList />,
+          },
+        ],
       },
       {
         path: "/players",
-        children: [{
-          index: true,
-          element: <PlayersList />
-        }],
-      }
+        children: [
+          {
+            index: true,
+            element: <PlayersList />,
+          },
+        ],
+      },
     ],
   },
 ]);
@@ -55,7 +60,9 @@ const queryClient = new QueryClient({});
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <DialogContextProvider>
+        <RouterProvider router={router} />
+      </DialogContextProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

@@ -1,16 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlayerService } from "./player.service";
 import PlayerCard, { type PlayerTeam } from "./PlayerCard";
 import CreateDialog from "@/components/CreateDialog";
-import PlayerCreateForm from "./PlayerCreateForm";
-import { useState } from "react";
+import PlayerForm from "./PlayerForm";
+import { useDialogContext } from "@/contexts/DialogContext";
 
 const TeamsList = () => {
-  const [openForm, setOpenForm] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false); //Stato per l'apertura della modal di messaggio
-  const [message, setMessage] = useState<string | undefined>(); //stato che salva il messaggio da mostrare nella modal
-
   const {
     data: teams = [],
     isPending,
@@ -18,6 +14,27 @@ const TeamsList = () => {
   } = useQuery({
     queryKey: ["players"],
     queryFn: PlayerService.list,
+  });
+
+  //ci prendiamo dal contesto della dialog le funzioni per aprire/chiudere la dialog e settare il messaggio
+  const { setOpenDialog, setMessage, /* setOpenForm */ } = useDialogContext();
+
+  const queryClient = useQueryClient(); //essenziqale per invalidare la query dei giocatori dopo la creazione di un nuovo giocatore
+  const { mutate: createPlayer, isPending: isCreating } = useMutation({
+    mutationFn: PlayerService.create, //funzione che chiama l'endpoint per creare un giocatore
+    onError: (error: Error) => {
+      setMessage(error.message);
+      setOpenDialog(true);
+    },
+    onSuccess: () => {
+      setMessage("Giocatore creato con successo!");
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+      queryClient.invalidateQueries({
+        //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo la creazione di un nuovo giocatore
+        queryKey: ["players"],
+      });
+    },
   });
 
   return (
@@ -28,12 +45,7 @@ const TeamsList = () => {
         </h1>
         <CreateDialog
           text="Aggiungi giocatore"
-          openForm={openForm}
-          setOpenForm={setOpenForm}
-          openDialog={openDialog}
-          setOpenDialog={setOpenDialog}
-          message={message}
-          children={<PlayerCreateForm setOpenDialog={setOpenDialog} setOpenForm={setOpenForm} setMessage={setMessage} />}
+          children={<PlayerForm mutate={createPlayer} isPending={isCreating} />}
         />
       </header>
 

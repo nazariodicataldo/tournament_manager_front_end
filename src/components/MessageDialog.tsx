@@ -1,3 +1,4 @@
+import { useDialogContext } from "@/contexts/DialogContext";
 import {
   Dialog,
   DialogContent,
@@ -5,13 +6,9 @@ import {
   DialogHeader,
 } from "./ui/dialog";
 
-type MessageDialogProps = {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  message?: string;
-};
-
-const MessageDialog = ({ open, setOpen, message }: MessageDialogProps) => {
+const MessageDialog = () => {
+  // Uso del contesto per ottenere lo stato della dialog e il messaggio
+  const { openDialog: open, message, setOpenDialog: setOpen } = useDialogContext();
   return (
     <Dialog open={open} onOpenChange={() => setOpen(false)}>
       <DialogContent>

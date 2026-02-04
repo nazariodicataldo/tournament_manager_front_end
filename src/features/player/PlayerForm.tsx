@@ -9,9 +9,11 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { useQuery } from "@tanstack/react-query";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlayerService } from "./player.service";
+import { capitalizeFirstLetter } from "@/lib/utils";
+import type { Player } from "./player.type";
+import { Loader2 } from "lucide-react";
 
+/* Mi creo lo scheme della validazione */
 const schema = z.object({
   firstName: z
     .string()
@@ -32,55 +34,47 @@ const schema = z.object({
   teamId: z.number().min(1, "Devi selezionare una squadra"),
 });
 
+/* Mi creo il tipo dato dallo schema di validazione */
 type FormType = z.infer<typeof schema>;
 
-type PlayerCreateFormProps = {
-  setOpenDialog: (open: boolean) => void;
-  setOpenForm: (open: boolean) => void;
-  setMessage: (message: string) => void;
+//Ruoli disponibili
+const roles = ["portiere", "difensore", "centrocampista", "attaccante"];
+
+//Tipo delle props del componente
+type PlayerFormProps = {
+  mutate: (args: { data: FormType; id?: number }) => void;
+  isPending?: boolean;
+  defaultValues?: Player;
 };
 
-const PlayerCreateForm = ({ setOpenDialog, setOpenForm, setMessage }: PlayerCreateFormProps) => {
-
+const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
+  //Query per prendere tutte le squadre e mostrarle nel select del form
   const { data: teams = [] } = useQuery({
     queryKey: ["teams"],
     queryFn: TeamService.list,
   });
 
+  //Mi prendo le funzioni di react-hook-form
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormType>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema), //collego zod a react hook form
+    defaultValues,
   });
 
-  const queryClient = useQueryClient();
-  const { mutate } = useMutation({
-    mutationFn: PlayerService.create,
-    onError: (error: Error) => {
-      setMessage(error.message);
-      setOpenDialog(true);
-      setOpenForm(false);
-    },
-    onSuccess: () => {
-      setMessage("Giocatore creato con successo!");
-      setOpenDialog(true);
-      setOpenForm(false);
-      queryClient.invalidateQueries({
-        queryKey: ["players"],
-      });
-    },
-  });
-
-  function handleCreatePlayer(data: FormType) {
-    mutate({data});
+  //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
+  function handleActionPlayer(data: FormType) {
+    mutate({ data, id: defaultValues?.id }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
   }
 
   return (
     <>
-      <form onSubmit={handleSubmit(handleCreatePlayer)} className="space-y-4">
-        <h2 className="text-lg font-medium mb-4">Crea Nuovo Giocatore</h2>
+      <form onSubmit={handleSubmit(handleActionPlayer)} className="space-y-4">
+        <h2 className="text-lg font-medium mb-4">
+          {defaultValues ? "Aggiorna Giocatore" : "Crea Nuovo Giocatore"}
+        </h2>
 
         {/* First name */}
         <div className="flex flex-col gap-1">
@@ -117,7 +111,13 @@ const PlayerCreateForm = ({ setOpenDialog, setOpenForm, setMessage }: PlayerCrea
           <label htmlFor="role" className="font-medium">
             Ruolo
           </label>
-          <Input id="role" {...register("role")} placeholder="Portiere" />
+          <NativeSelect className="w-full" id="role" {...register("role")}>
+            {roles.map((role) => (
+              <NativeSelectOption key={role} value={role}>
+                {capitalizeFirstLetter(role)}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
           {errors.role && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.role.message}
@@ -169,11 +169,22 @@ const PlayerCreateForm = ({ setOpenDialog, setOpenForm, setMessage }: PlayerCrea
           )}
         </div>
 
-        <Button size={"lg"} type="submit" className="w-full mt-4">
-          Crea Giocatore
+        <Button
+          disabled={isPending}
+          size={"lg"}
+          type="submit"
+          className="w-full mt-4"
+        >
+          {isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : defaultValues ? (
+            "Aggiorna Giocatore"
+          ) : (
+            "Crea Giocatore"
+          )}
         </Button>
       </form>
     </>
   );
 };
-export default PlayerCreateForm;
+export default PlayerForm;

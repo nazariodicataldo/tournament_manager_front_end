@@ -1,28 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import MessageDialog from "./MessageDialog";
 import { useDialogContext } from "@/contexts/DialogContext";
 
-type CreateDialogProps = {
-  text: string;
+type UpdateDialogProps = {
   children: React.ReactNode;
 };
 
-const CreateDialog = ({ text, children }: CreateDialogProps) => {
+const UpdateDialog = ({ children }: UpdateDialogProps) => {
   //Uso del contesto per gestire lo stato della dialog e il messaggio
-  /* const { openForm, setOpenForm } =   useDialogContext(); */
+  const { openUpdateForm, setOpenUpdateForm } = useDialogContext();
 
   return (
     <>
       {/* Dialog che contiene il form */}
-      <Dialog /* open={openForm} onOpenChange={setOpenForm} */>
+      <Dialog open={openUpdateForm} onOpenChange={setOpenUpdateForm}>
         <DialogTrigger
           nativeButton={false}
           render={
-            <Button size={"lg"}>
-              <PlusIcon />
-              {text}
+            <Button variant={"outline"}>
+              <Pencil />
+              Modifica
             </Button>
           }
         />
@@ -30,9 +29,9 @@ const CreateDialog = ({ text, children }: CreateDialogProps) => {
       </Dialog>
 
       {/* Dialog di messaggio dopo l'invio del form   */}
-      <MessageDialog/>
+      <MessageDialog />
     </>
   );
 };
 
-export default CreateDialog;
+export default UpdateDialog;
