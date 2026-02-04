@@ -4,8 +4,11 @@ import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
-import TournamentsPage from "./pages/TournamentsPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import TeamsList from "./features/team/TeamsList";
+import TournamentsList from "./features/tournament/TournamentsList";
+import TournamentPage from "./pages/TournamentPage";
+import PlayersList from "./features/player/PlayersList";
 
 const router = createBrowserRouter([
   {
@@ -21,10 +24,28 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <TournamentsPage />,
+            element: <TournamentsList />
+          },
+          {
+            path: "/tournaments/:id",
+            element: <TournamentPage />,
           },
         ],
       },
+      {
+        path: "/teams",
+        children: [{
+          index: true,
+          element: <TeamsList />
+        }],
+      },
+      {
+        path: "/players",
+        children: [{
+          index: true,
+          element: <PlayersList />
+        }],
+      }
     ],
   },
 ]);
