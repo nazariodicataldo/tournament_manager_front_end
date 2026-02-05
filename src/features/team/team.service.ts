@@ -37,6 +37,8 @@ export class TeamService {
     id: number;
     data: Omit<Partial<Team>, "id" | "createdAt" | "updatedAt">;
   }): Promise<Team> {
+
+    
     //Con Partial rendo tutti i campi del tipo opzionali
     const team = await myFetch<ServerTeam>(
       `${myEnv.backendApiUrl}/teams/${id}`,

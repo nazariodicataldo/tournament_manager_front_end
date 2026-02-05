@@ -16,6 +16,14 @@ export class PlayerService {
     return players.map(ServerPlayerToPlayer);
   }
 
+  static async free_agents(): Promise<Player[]> {
+    const players = await myFetch<ServerPlayer[]>(
+      `${myEnv.backendApiUrl}/players/free_agents`,
+    );
+
+    return players.map(ServerPlayerToPlayer);
+  }
+
   static async get(id: Player["id"]): Promise<Player> {
     const player = await myFetch<ServerPlayer>(
       `${myEnv.backendApiUrl}/players/${id}`,
@@ -28,6 +36,7 @@ export class PlayerService {
   }: {
     data: Omit<Player, "id" | "createdAt" | "updatedAt">;
   }): Promise<Player> {
+    
     const player = await myFetch<ServerPlayer>(
       `${myEnv.backendApiUrl}/players`,
       {
@@ -43,14 +52,14 @@ export class PlayerService {
     id,
     data,
   }: {
-    id: number;
+    id?: number;
     data: Omit<Partial<Player>, "id" | "createdAt" | "updatedAt">;
   }): Promise<Player> {
     //Con Partial rendo tutti i campi del tipo opzionali
     const player = await myFetch<ServerPlayer>(
-      `${myEnv.backendApiUrl}/players/${id}`,
+      `${myEnv.backendApiUrl}/players/${id!}`,
       {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify(PlayerToServerPlayer(data)),
       },
     );

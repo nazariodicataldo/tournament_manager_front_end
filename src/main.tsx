@@ -10,6 +10,7 @@ import TournamentsList from "./features/tournament/TournamentsList";
 import TournamentPage from "./pages/TournamentPage";
 import PlayersList from "./features/player/PlayersList";
 import DialogContextProvider from "./contexts/DialogContext";
+import TeamPage from "./pages/TeamPage";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
             index: true,
             element: <TeamsList />,
           },
+          {
+            path: "/teams/:id",
+            element: <TeamPage />,
+          }
         ],
       },
       {

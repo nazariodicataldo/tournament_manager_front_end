@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/native-select";
 import { useQuery } from "@tanstack/react-query";
 import { capitalizeFirstLetter } from "@/lib/utils";
-import type { Player } from "./player.type";
 import { Loader2 } from "lucide-react";
 
 /* Mi creo lo scheme della validazione */
@@ -35,16 +34,16 @@ const schema = z.object({
 });
 
 /* Mi creo il tipo dato dallo schema di validazione */
-type FormType = z.infer<typeof schema>;
+export type PlayerFormType = z.infer<typeof schema>;
 
 //Ruoli disponibili
 const roles = ["portiere", "difensore", "centrocampista", "attaccante"];
 
 //Tipo delle props del componente
 type PlayerFormProps = {
-  mutate: (args: { data: FormType; id?: number }) => void;
+  mutate: (args: { data: PlayerFormType; id?: number }) => void;
   isPending?: boolean;
-  defaultValues?: Player;
+  defaultValues?: PlayerFormType & { id: number };
 };
 
 const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
@@ -59,13 +58,13 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormType>({
+  } = useForm<PlayerFormType>({
     resolver: zodResolver(schema), //collego zod a react hook form
     defaultValues,
   });
 
   //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
-  function handleActionPlayer(data: FormType) {
+  function handleActionPlayer(data: PlayerFormType) {
     mutate({ data, id: defaultValues?.id }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
   }
 

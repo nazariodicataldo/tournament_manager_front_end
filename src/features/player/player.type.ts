@@ -3,8 +3,8 @@ export type Player = {
   firstName: string;
   lastName: string;
   role: "portiere" | "difensore" | "centrocampista" | "attaccante";
-  number?: number;
-  teamId?: number;
+  number?: number | null;
+  teamId: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -14,21 +14,15 @@ export type ServerPlayer = {
   first_name: string;
   last_name: string;
   role: "portiere" | "difensore" | "centrocampista" | "attaccante";
-  number: number;
-  team_id: number;
+  number: number | null;
+  team_id: number | null;
   created_at: string;
   updated_at: string;
 };
 
 export function ServerPlayerToPlayer(input: ServerPlayer): Player {
-  const {
-    first_name,
-    last_name,
-    team_id,
-    created_at,
-    updated_at,
-    ...rest
-  } = input;
+  const { first_name, last_name, team_id, created_at, updated_at, ...rest } =
+    input;
 
   return {
     ...rest,
@@ -43,8 +37,7 @@ export function ServerPlayerToPlayer(input: ServerPlayer): Player {
 export function PlayerToServerPlayer(
   input: Partial<Player>,
 ): Partial<Omit<ServerPlayer, "id">> {
-  const { firstName, lastName, teamId, createdAt, updatedAt, ...rest } =
-    input;
+  const { firstName, lastName, teamId, createdAt, updatedAt, ...rest } = input;
 
   return {
     ...rest,

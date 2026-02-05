@@ -22,7 +22,7 @@ import { PlayerService } from "@/features/player/player.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDialogContext } from "@/contexts/DialogContext";
 import UpdateDialog from "@/components/UpdateDialog";
-import PlayerForm from "./PlayerForm";
+import PlayerForm, { type PlayerFormType } from "./PlayerForm";
 
 export type PlayerTeam = Player & { team: Team };
 
@@ -95,7 +95,7 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
                 <PlayerForm
                   isPending={isUpdating}
                   mutate={(args) => updatePlayer({ ...args, id: item.id })}
-                  defaultValues={item}
+                  defaultValues={item as PlayerFormType & { id: number }}
                 />
               }
             />

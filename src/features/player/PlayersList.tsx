@@ -41,7 +41,7 @@ const PlayersList = () => {
     <>
       <header className="mt-8 flex justify-between items-center">
         <h1 className="text-2xl text-primary font-semibold">
-          Tutte i giocatori
+          Tutti i giocatori
         </h1>
         <CreateDialog
           text="Aggiungi giocatore"

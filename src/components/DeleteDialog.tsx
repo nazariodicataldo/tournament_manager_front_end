@@ -10,16 +10,25 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, ShieldOff, Trash2 } from "lucide-react";
 import MessageDialog from "./MessageDialog";
 
 type DeleteDialogProps = {
-  mutate: (id: number) => void;
+  mutate?: (id: number) => void;
   isPending: boolean | undefined;
   id: number;
+  updateMutate?: (args: {
+    id: number;
+    data: { [key: string]: number | string | null };
+  }) => void;
 };
 
-function DeleteDialog({ mutate, isPending, id }: DeleteDialogProps) {
+function DeleteDialog({
+  mutate,
+  isPending,
+  id,
+  updateMutate,
+}: DeleteDialogProps) {
   //uso del context per gestire l'apertura della dialog di messaggio e il messaggio da mostrare
   /* const { openDeleteForm, setOpenDeleteForm } = useDialogContext(); */
 
@@ -30,8 +39,8 @@ function DeleteDialog({ mutate, isPending, id }: DeleteDialogProps) {
           nativeButton={false}
           render={
             <Button variant={"destructive"}>
-              <Trash2 />
-              Elimina
+              {!updateMutate ? <Trash2 /> : <ShieldOff />}
+              {!updateMutate ? "Elimina" : "Rimuovi"}
             </Button>
           }
         ></AlertDialogTrigger>
@@ -47,7 +56,16 @@ function DeleteDialog({ mutate, isPending, id }: DeleteDialogProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annulla</AlertDialogCancel>
-            <AlertDialogAction variant={'destructive'} disabled={isPending} onClick={() => mutate(id)}>
+            <AlertDialogAction
+              variant={"destructive"}
+              disabled={isPending}
+              onClick={
+                updateMutate
+                  ? () =>
+                      updateMutate({ id, data: { teamId: null, number: null } })
+                  : () => mutate!(id)
+              }
+            >
               {isPending ? <Loader2 className="animate-spin" /> : "Elimina"}
             </AlertDialogAction>
           </AlertDialogFooter>

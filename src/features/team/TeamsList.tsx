@@ -50,7 +50,7 @@ const TeamsList = () => {
         <CreateDialog
           text="Aggiungi Squadra"
           children={
-            <TeamForm mutate={(args) => createTeam(args)} isPending={isCreating} />
+            <TeamForm mutate={createTeam} isPending={isCreating} />
           }
         />
       </header>
