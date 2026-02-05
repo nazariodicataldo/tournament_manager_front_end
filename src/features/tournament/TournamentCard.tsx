@@ -18,18 +18,66 @@ import {
   Calendar,
   Check,
   Ellipsis,
-  Pencil,
+  MapPin,
   Play,
   Timer,
-  Trash2,
   Trophy,
   Users,
 } from "lucide-react";
 import type { JSX } from "react";
 import type { Tournament } from "./tournament.type";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDialogContext } from "@/contexts/DialogContext";
+import { TournamentService } from "./tournament.service";
+import DeleteDialog from "@/components/DeleteDialog";
+import UpdateDialog from "@/components/UpdateDialog";
+import TournamentForm from "./TournamentForm";
 
-const TournamentCard = ({ item }: { item: Tournament}) => {
-  function returnStatus(status: string): JSX.Element {
+const TournamentCard = ({ item }: { item: Tournament }) => {
+  const DialogContext = useDialogContext();
+  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+
+  const queryClient = useQueryClient();
+
+  //Mutation per eliminare un torneo
+  const { mutate: deleteTournament, isPending: isDeleting } = useMutation({
+    mutationFn: TournamentService.delete, //funzione che chiama l'endpoint per eliminare un torneo
+    onSettled: () => {
+      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+    },
+    onError: (error: Error) => {
+      setMessage(error.message);
+    },
+    onSuccess: () => {
+      setMessage("Torneo eliminato con successo!");
+      queryClient.invalidateQueries({
+        //invalidazione della query dei tornei per rifetchare la lista aggiornata dopo l'eliminazione di un torneo
+        queryKey: ["tournaments"],
+      });
+    },
+  });
+
+  //Mutation per aggiornare un torneo
+  const { mutate: updateTournament, isPending: isUpdating } = useMutation({
+    mutationFn: TournamentService.update, //funzione che chiama l'endpoint per aggiornare un torneo
+    onError: (error: Error) => {
+      setMessage(error.message);
+      setOpenDialog(true);
+    },
+    onSuccess: () => {
+      setMessage("Torneo aggiornato con successo!");
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+      queryClient.invalidateQueries({
+        //invalidazione della query dei tornei per rifetchare la lista aggiornata dopo l'aggiornamento di un torneo
+        queryKey: ["tournaments"],
+      });
+    },
+  });
+
+  function returnStatus(status: string | undefined): JSX.Element {
     switch (status) {
       case "draft":
         return (
@@ -96,14 +144,22 @@ const TournamentCard = ({ item }: { item: Tournament}) => {
             }
           />
           <PopoverContent className={"w-40 flex flex-col gap-2"}>
-            <Button variant={"outline"}>
-              <Pencil />
-              Modifica
-            </Button>
-            <Button variant={"destructive"}>
-              <Trash2 />
-              Elimina
-            </Button>
+            {/* Dialog per l'aggiornamento */}
+            <UpdateDialog
+              children={
+                <TournamentForm
+                  isPending={isUpdating}
+                  mutate={(args) => updateTournament({ ...args, id: item.id })}
+                  defaultValues={item}
+                />
+              }
+            />
+            {/* Dialog per l'eliminazione */}
+            <DeleteDialog
+              isPending={isDeleting}
+              mutate={deleteTournament}
+              id={item.id}
+            />
           </PopoverContent>
         </Popover>
       </CardHeader>
@@ -118,9 +174,14 @@ const TournamentCard = ({ item }: { item: Tournament}) => {
           </p>
         </CardDescription>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex justify-between items-center">
+        {/* Anno di inizio */}
         <p className="flex text-[16px] w-full pt-3 text-neutral-500 items-center gap-1 border-t border-b-neutral-500">
           <Calendar size={20} /> Inizio: {item.year}
+        </p>
+        {/* Luogo del torneo */}
+        <p className="flex text-[16px] w-full pt-3 text-neutral-500 items-center gap-1 border-t border-b-neutral-500">
+          <MapPin size={20} /> Luogo: {item.place}
         </p>
       </CardFooter>
     </Card>

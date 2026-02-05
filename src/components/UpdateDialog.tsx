@@ -10,12 +10,12 @@ type UpdateDialogProps = {
 
 const UpdateDialog = ({ children }: UpdateDialogProps) => {
   //Uso del contesto per gestire lo stato della dialog e il messaggio
-  const { openUpdateForm, setOpenUpdateForm } = useDialogContext();
+  /* const { openUpdateForm, setOpenUpdateForm } = useDialogContext(); */
 
   return (
     <>
       {/* Dialog che contiene il form */}
-      <Dialog open={openUpdateForm} onOpenChange={setOpenUpdateForm}>
+      <Dialog /* open={openUpdateForm} onOpenChange={setOpenUpdateForm} */>
         <DialogTrigger
           nativeButton={false}
           render={

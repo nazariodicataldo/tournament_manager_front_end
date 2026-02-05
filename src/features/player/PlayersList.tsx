@@ -6,9 +6,9 @@ import CreateDialog from "@/components/CreateDialog";
 import PlayerForm from "./PlayerForm";
 import { useDialogContext } from "@/contexts/DialogContext";
 
-const TeamsList = () => {
+const PlayersList = () => {
   const {
-    data: teams = [],
+    data: players = [],
     isPending,
     /* isError, */
   } = useQuery({
@@ -59,12 +59,12 @@ const TeamsList = () => {
             ))}
 
         {/* Rendering cards */}
-        {teams.map((team) => (
-          <PlayerCard item={team as PlayerTeam} />
+        {players.map((player) => (
+          <PlayerCard key={player.id} item={player as PlayerTeam} />
         ))}
       </section>
     </>
   );
 };
 
-export default TeamsList;
+export default PlayersList;

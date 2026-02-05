@@ -26,8 +26,9 @@ export class TournamentService {
   static async create({
     data,
   }: {
-    data: Omit<Tournament, "id">;
+    data: Omit<Tournament, "id" | "createdAt" | "updatedAt">;
   }): Promise<Tournament> {
+    console.log(data);
     const tournament = await myFetch<ServerTournament>(
       `${myEnv.backendApiUrl}/tournaments`,
       {
@@ -44,7 +45,7 @@ export class TournamentService {
     data,
   }: {
     id: number;
-    data: Omit<Partial<Tournament>, "id">;
+    data: Omit<Partial<Tournament>, "id" | "createdAt" | "updatedAt">;
   }): Promise<Tournament> {
     //Con Partial rendo tutti i campi del tipo opzionali
     const tournament = await myFetch<ServerTournament>(

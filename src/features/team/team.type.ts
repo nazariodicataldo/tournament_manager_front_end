@@ -10,7 +10,7 @@ export type Team = {
   name: string;
   icon: IconName;
   color: string;
-  players: Player[];
+  players?: Player[]; //opzionale perché quando creo una squadra non passo i giocatori
   createdAt: string;
   updatedAt: string;
 };
@@ -20,7 +20,7 @@ export type ServerTeam = {
   name: string;
   icon: IconName;
   color: string;
-  players: ServerPlayer[];
+  players: ServerPlayer[]; //opzionale perchè una squadra potrebbe non avere giocatori e tornare dall'API senza giocatori
   created_at: string;
   updated_at: string;
 };
@@ -28,11 +28,11 @@ export type ServerTeam = {
 export function ServerTeamToTeam(input: ServerTeam): Team {
   const { created_at, updated_at, players, ...rest } = input;
 
-  const players_mapped = players.map(ServerPlayerToPlayer);
+  const players_mapped = players?.map(ServerPlayerToPlayer);
 
   return {
     ...rest,
-    players: players_mapped,
+    players: players_mapped ?? [],
     createdAt: created_at,
     updatedAt: updated_at,
   };
@@ -60,7 +60,7 @@ export function TeamToServerTeam(
 
   return {
     ...rest,
-    players: players_mapped,
+    players: players_mapped ?? [],
     created_at: createdAt,
     updated_at: updatedAt,
   };

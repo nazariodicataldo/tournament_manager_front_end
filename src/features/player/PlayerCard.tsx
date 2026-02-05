@@ -94,12 +94,7 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
               children={
                 <PlayerForm
                   isPending={isUpdating}
-                  mutate={({ data, id }) =>
-                    updatePlayer({
-                      id: id as number,
-                      data: { ...data },
-                    })
-                  }
+                  mutate={(args) => updatePlayer({ ...args, id: item.id })}
                   defaultValues={item}
                 />
               }

@@ -9,10 +9,8 @@ import myEnv from "@/lib/env";
 
 export class TeamService {
   static async list(): Promise<Team[]> {
-    const teams = await myFetch<ServerTeam[]>(
-      `${myEnv.backendApiUrl}/teams`,
-    );
-    
+    const teams = await myFetch<ServerTeam[]>(`${myEnv.backendApiUrl}/teams`);
+
     return teams.map(ServerTeamToTeam);
   }
 
@@ -23,18 +21,11 @@ export class TeamService {
     return ServerTeamToTeam(team);
   }
 
-  static async create({
-    data,
-  }: {
-    data: Omit<Team, "id">;
-  }): Promise<Team> {
-    const team = await myFetch<ServerTeam>(
-      `${myEnv.backendApiUrl}/teams`,
-      {
-        method: "POST",
-        body: JSON.stringify(TeamToServerTeam(data)),
-      },
-    );
+  static async create({ data }: { data: Omit<Team, "id" | "createdAt" | "updatedAt" | "players"> }): Promise<Team> {
+    const team = await myFetch<ServerTeam>(`${myEnv.backendApiUrl}/teams`, {
+      method: "POST",
+      body: JSON.stringify(TeamToServerTeam(data)),
+    });
 
     return ServerTeamToTeam(team);
   }
@@ -44,7 +35,7 @@ export class TeamService {
     data,
   }: {
     id: number;
-    data: Omit<Partial<Team>, "id">;
+    data: Omit<Partial<Team>, "id" | "createdAt" | "updatedAt">;
   }): Promise<Team> {
     //Con Partial rendo tutti i campi del tipo opzionali
     const team = await myFetch<ServerTeam>(

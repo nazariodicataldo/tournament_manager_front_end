@@ -6,16 +6,64 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, Pencil, Trash2, Users } from "lucide-react";
+import { Ellipsis, Users } from "lucide-react";
 import type { Team } from "./team.type";
 import { DynamicIcon } from "lucide-react/dynamic";
+import DeleteDialog from "@/components/DeleteDialog";
+import { useDialogContext } from "@/contexts/DialogContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TeamService } from "./team.service";
+import UpdateDialog from "@/components/UpdateDialog";
+import TeamForm from "./TeamForm";
 
 const TeamCard = ({ item }: { item: Team }) => {
+  const DialogContext = useDialogContext();
+  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+
+  const queryClient = useQueryClient();
+
+  //Mutation per eliminare un torneo
+  const { mutate: deleteTeam, isPending: isDeleting } = useMutation({
+    mutationFn: TeamService.delete, //funzione che chiama l'endpoint per eliminare un torneo
+    onSettled: () => {
+      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+    },
+    onError: (error: Error) => {
+      setMessage(error.message);
+    },
+    onSuccess: () => {
+      setMessage("Squadra eliminata con successo!");
+      queryClient.invalidateQueries({
+        //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo l'eliminazione di una squadra
+        queryKey: ["teams"],
+      });
+    },
+  });
+
+  //Mutation per aggiornare un torneo
+    const { mutate: updateTeam, isPending: isUpdating } = useMutation({
+      mutationFn: TeamService.update, //funzione che chiama l'endpoint per aggiornare un torneo
+      onError: (error: Error) => {
+        setMessage(error.message);
+        setOpenDialog(true);
+      },
+      onSuccess: () => {
+        setMessage("Squadra aggiornata con successo!");
+        /* setOpenForm(false); */
+        setOpenDialog(true);
+        queryClient.invalidateQueries({
+          //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo l'aggiornamento di una squadra
+          queryKey: ["teams"],
+        });
+      },
+    });
 
   return (
     <Card
       key={item.id}
-      style={{ borderColor: item.color, backgroundColor: item.color + '10' }}
+      style={{ borderColor: item.color, backgroundColor: item.color + "10" }}
       className="w-full max-w-sm border gap-4 relative "
     >
       <CardHeader className="flex justify-between">
@@ -44,14 +92,22 @@ const TeamCard = ({ item }: { item: Team }) => {
             }
           />
           <PopoverContent className={"w-40 flex flex-col gap-2"}>
-            <Button variant={"outline"}>
-              <Pencil />
-              Modifica
-            </Button>
-            <Button variant={"destructive"}>
-              <Trash2 />
-              Elimina
-            </Button>
+            {/* Dialog per l'aggiornamento */}
+            <UpdateDialog
+              children={
+                <TeamForm
+                  isPending={isUpdating}
+                  mutate={(args) => updateTeam({ ...args, id: item.id })}
+                  defaultValues={item}
+                />
+              }
+            />
+            {/* Dialog per l'eliminazione */}
+            <DeleteDialog
+              isPending={isDeleting}
+              mutate={deleteTeam}
+              id={item.id}
+            />
           </PopoverContent>
         </Popover>
       </CardHeader>

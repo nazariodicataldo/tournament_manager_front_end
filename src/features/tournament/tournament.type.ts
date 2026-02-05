@@ -3,7 +3,7 @@ export type Tournament = {
   name: string;
   year: number;
   place: string;
-  status: "draft" | "ready" | "in_progress" | "completed";
+  status?: "draft" | "ready" | "in_progress" | "completed";
   participantsNumber: number;
   description?: string;
   createdAt: string;

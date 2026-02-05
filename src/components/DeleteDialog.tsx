@@ -47,7 +47,7 @@ function DeleteDialog({ mutate, isPending, id }: DeleteDialogProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annulla</AlertDialogCancel>
-            <AlertDialogAction disabled={isPending} onClick={() => mutate(id)}>
+            <AlertDialogAction variant={'destructive'} disabled={isPending} onClick={() => mutate(id)}>
               {isPending ? <Loader2 className="animate-spin" /> : "Elimina"}
             </AlertDialogAction>
           </AlertDialogFooter>
