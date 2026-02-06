@@ -10,7 +10,7 @@ export type Team = {
   name: string;
   icon: IconName;
   color: string;
-  players?: Player[]; //opzionale perché quando creo una squadra non passo i giocatori
+  players: Player[]; //opzionale perché quando creo una squadra non passo i giocatori
   createdAt: string;
   updatedAt: string;
 };
@@ -40,27 +40,11 @@ export function ServerTeamToTeam(input: ServerTeam): Team {
 
 export function TeamToServerTeam(
   input: Partial<Team>,
-): Partial<Omit<ServerTeam, "id">> {
-  const { createdAt, updatedAt, players, ...rest } = input;
-
-  //Map dell'array di giocatori -> da player a serverPlayer
-  const players_mapped = players?.map((player) => {
-    const { firstName, lastName, teamId, createdAt, updatedAt, ...rest } = player;
-
-    return {
-      ...rest,
-      first_name: firstName,
-      last_name: lastName,
-      team: input,
-      team_id: teamId,
-      created_at: createdAt,
-      updated_at: updatedAt,
-    } as ServerPlayer;
-  });
+): Partial<Omit<ServerTeam, "id" | "players">> {
+  const { createdAt, updatedAt, ...rest } = input;
 
   return {
     ...rest,
-    players: players_mapped ?? [],
     created_at: createdAt,
     updated_at: updatedAt,
   };

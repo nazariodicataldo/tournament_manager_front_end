@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDialogContext } from "@/contexts/DialogContext";
 import { PlayerService } from "@/features/player/player.service";
 import type { Player } from "@/features/player/player.type";
-import PlayerTeamForm, { type MutationArgs } from "@/features/player_team/PlayerTeamForm";
+import PlayerTeamForm, { type MutationArgs } from "@/features/playerTeam/PlayerTeamForm";
 import { TeamService } from "@/features/team/team.service";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

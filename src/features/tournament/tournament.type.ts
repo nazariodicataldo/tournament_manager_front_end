@@ -5,7 +5,6 @@ export type Tournament = {
   place: string;
   status?: "draft" | "ready" | "in_progress" | "completed";
   participantsNumber: number;
-  description?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -17,7 +16,6 @@ export type ServerTournament = {
   place: string;
   status: "draft" | "ready" | "in_progress" | "completed";
   participants_number: number;
-  description: string;
   created_at: string;
   updated_at: string;
 };
@@ -36,13 +34,13 @@ export function ServerTournamentToTournament(
 }
 
 export function tournamentToServerTournament(
-  input: Partial<Tournament>,
-): Partial<Omit<ServerTournament, "id">> {
-  //Se non ti passo la I, prendi Map come tipo
+  input: Tournament,
+): Omit<ServerTournament, "id"> {
   const { participantsNumber, createdAt, updatedAt, ...rest } = input;
 
   return {
     ...rest,
+    status: input.status ?? "draft",
     participants_number: participantsNumber,
     created_at: createdAt,
     updated_at: updatedAt,

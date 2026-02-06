@@ -7,9 +7,10 @@ import { useDialogContext } from "@/contexts/DialogContext";
 type CreateDialogProps = {
   text: string;
   children: React.ReactNode;
+  disabled?: boolean;
 };
 
-const CreateDialog = ({ text, children }: CreateDialogProps) => {
+const CreateDialog = ({ text, children, disabled }: CreateDialogProps) => {
   //Uso del contesto per gestire lo stato della dialog e il messaggio
   /* const { openForm, setOpenForm } =   useDialogContext(); */
 
@@ -20,7 +21,7 @@ const CreateDialog = ({ text, children }: CreateDialogProps) => {
         <DialogTrigger
           nativeButton={false}
           render={
-            <Button size={"lg"}>
+            <Button disabled={disabled} size={"lg"}>
               <PlusIcon />
               {text}
             </Button>
@@ -30,7 +31,7 @@ const CreateDialog = ({ text, children }: CreateDialogProps) => {
       </Dialog>
 
       {/* Dialog di messaggio dopo l'invio del form   */}
-      <MessageDialog/>
+      <MessageDialog />
     </>
   );
 };

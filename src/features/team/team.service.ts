@@ -21,7 +21,11 @@ export class TeamService {
     return ServerTeamToTeam(team);
   }
 
-  static async create({ data }: { data: Omit<Team, "id" | "createdAt" | "updatedAt" | "players"> }): Promise<Team> {
+  static async create({
+    data,
+  }: {
+    data: Omit<Team, "id">;
+  }): Promise<Team> {
     const team = await myFetch<ServerTeam>(`${myEnv.backendApiUrl}/teams`, {
       method: "POST",
       body: JSON.stringify(TeamToServerTeam(data)),
@@ -35,10 +39,8 @@ export class TeamService {
     data,
   }: {
     id: number;
-    data: Omit<Partial<Team>, "id" | "createdAt" | "updatedAt">;
+    data: Omit<Team, "id">;
   }): Promise<Team> {
-
-    
     //Con Partial rendo tutti i campi del tipo opzionali
     const team = await myFetch<ServerTeam>(
       `${myEnv.backendApiUrl}/teams/${id}`,

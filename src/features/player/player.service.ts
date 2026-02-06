@@ -34,9 +34,8 @@ export class PlayerService {
   static async create({
     data,
   }: {
-    data: Omit<Player, "id" | "createdAt" | "updatedAt">;
+    data: Omit<Player, "id">;
   }): Promise<Player> {
-    
     const player = await myFetch<ServerPlayer>(
       `${myEnv.backendApiUrl}/players`,
       {
@@ -53,7 +52,7 @@ export class PlayerService {
     data,
   }: {
     id?: number;
-    data: Omit<Partial<Player>, "id" | "createdAt" | "updatedAt">;
+    data: Partial<Omit<Player, "id" | "createdAt" | "updatedAt">>;
   }): Promise<Player> {
     //Con Partial rendo tutti i campi del tipo opzionali
     const player = await myFetch<ServerPlayer>(

@@ -3,7 +3,7 @@ export type Player = {
   firstName: string;
   lastName: string;
   role: "portiere" | "difensore" | "centrocampista" | "attaccante";
-  number?: number | null;
+  number: number | null;
   teamId: number | null;
   createdAt: string;
   updatedAt: string;
