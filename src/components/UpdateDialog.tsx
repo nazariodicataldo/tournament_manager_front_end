@@ -6,9 +6,10 @@ import { useDialogContext } from "@/contexts/DialogContext";
 
 type UpdateDialogProps = {
   children: React.ReactNode;
+  text: string;
 };
 
-const UpdateDialog = ({ children }: UpdateDialogProps) => {
+const UpdateDialog = ({ children, text }: UpdateDialogProps) => {
   //Uso del contesto per gestire lo stato della dialog e il messaggio
   /* const { openUpdateForm, setOpenUpdateForm } = useDialogContext(); */
 
@@ -21,7 +22,7 @@ const UpdateDialog = ({ children }: UpdateDialogProps) => {
           render={
             <Button variant={"outline"}>
               <Pencil />
-              Modifica
+              {text}
             </Button>
           }
         />

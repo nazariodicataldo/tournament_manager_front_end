@@ -52,7 +52,7 @@ export class PlayerService {
     data,
   }: {
     id?: number;
-    data: Partial<Omit<Player, "id" | "createdAt" | "updatedAt">>;
+    data: Partial<Omit<Player, "id">>;
   }): Promise<Player> {
     //Con Partial rendo tutti i campi del tipo opzionali
     const player = await myFetch<ServerPlayer>(

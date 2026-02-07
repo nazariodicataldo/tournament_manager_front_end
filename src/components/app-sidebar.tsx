@@ -11,7 +11,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router";
+import { NavLink, useLocation } from "react-router";
+import { cn } from "@/lib/utils";
 
 export type NavigationType = {
   title: string;
@@ -28,7 +29,7 @@ const navigation: NavigationType[] = [
   {
     title: "Teams",
     url: "/teams",
-    icon: "users",
+    icon: "shield",
   },
   {
     title: "Players",
@@ -38,6 +39,7 @@ const navigation: NavigationType[] = [
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { pathname } = useLocation();
   return (
     <Sidebar {...props} collapsible="icon">
       <SidebarHeader className="px-4 flex flex-row items-center">
@@ -51,15 +53,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 <SidebarMenuButton
                   render={
-                    <Link
+                    <NavLink
                       title={item.title}
                       to={item.url}
-                      className="flex gap-2 items-center text-lg"
+                      className={cn(
+                        "flex gap-2 items-center text-lg",
+                        pathname === item.url && "bg-primary/50 text-primary-foreground",
+                      )}
                     />
                   }
                 >
                   <DynamicIcon name={item.icon} size={48} />
-                  {item.title}
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroupContent>

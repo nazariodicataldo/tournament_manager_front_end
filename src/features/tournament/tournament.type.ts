@@ -34,8 +34,8 @@ export function ServerTournamentToTournament(
 }
 
 export function tournamentToServerTournament(
-  input: Tournament,
-): Omit<ServerTournament, "id"> {
+  input: Partial<Tournament>,
+): Partial<Omit<ServerTournament, "id">> {
   const { participantsNumber, createdAt, updatedAt, ...rest } = input;
 
   return {

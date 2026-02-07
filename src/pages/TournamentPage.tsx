@@ -3,11 +3,12 @@ import { AnimatedList } from "@/components/ui/animated-list";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDialogContext } from "@/contexts/DialogContext";
+import GamesList from "@/features/game/GamesList";
 import { TeamTournamentService } from "@/features/teamTournaments/teamTournament.service";
 import TeamTournamentForm from "@/features/teamTournaments/TeamTournamentForm";
 import { TournamentService } from "@/features/tournament/tournament.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FolderTree } from "lucide-react";
+import { ArrowLeft, FolderTree, ShieldOff } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 const TournamentPage = () => {
@@ -77,6 +78,26 @@ const TournamentPage = () => {
     },
   });
 
+  //Mutation per modificare lo status del torneo e quindi generare abbinamenti
+  const { mutate: updateStatus, isPending: isUpdating } = useMutation({
+    mutationFn: TournamentService.update, //funzione che chiama l'endpoint per aggiungere il giocatore
+    onSettled: () => {
+      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+    },
+    onError: (error: Error) => {
+      setMessage(error.message);
+    },
+    onSuccess: () => {
+      setMessage("Abbinamenti generati correttamente");
+      queryClient.invalidateQueries({
+        //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
+        queryKey: ["tournament", { id: +id! }],
+      });
+    },
+  });
+
   return (
     <>
       <header className="mt-8 grid grid-cols-3">
@@ -96,16 +117,19 @@ const TournamentPage = () => {
             Lista squadre iscritte ({teamTournament?.length || 0})
           </h2>
 
-          <CreateDialog
-            text="Aggiungi giocatore alla squadra"
-            children={
-              <TeamTournamentForm
-                mutate={addTeam}
-                tournamentId={+id!}
-                isPending={isAdding}
-              />
-            }
-          />
+          {/* Il pulsante per aggiungere la squadra è visibile solo se il torneo non è ancora pronto */}
+          {tournament?.status === "draft" && (
+            <CreateDialog
+              text="Iscrivi squadra"
+              children={
+                <TeamTournamentForm
+                  mutate={addTeam}
+                  tournamentId={+id!}
+                  isPending={isAdding}
+                />
+              }
+            />
+          )}
         </div>
 
         {isError && (
@@ -130,16 +154,37 @@ const TournamentPage = () => {
                   ))}
 
               {teamTournament?.reverse().map((t) => (
-                <div className="bg-secondary p-4 rounded-lg flex flex-col gap-3">
+                <div className="bg-secondary p-4 rounded-lg flex gap-2 items-center justify-between">
                   <h3 className="font-semibold" style={{ color: t.team.color }}>
                     {t.team.name}
                   </h3>
+                  <Button
+                    variant={"destructive"}
+                    disabled={isRemoving}
+                    onClick={() =>
+                      removeTeam({
+                        teamId: t.teamId,
+                        tournamentId: tournament.id,
+                      })
+                    }
+                  >
+                    <ShieldOff />
+                    Rimuovi
+                  </Button>
                 </div>
               ))}
             </AnimatedList>
 
+            {/* Pulsante per generare gli abbinamenti tra squadre */}
+            {/* di fatto cambio lo status del torneo da draft a ready */}
             <div className="flex justify-end w-full mt-16">
-              <Button size={"lg"}>
+              <Button
+                size={"lg"}
+                disabled={isUpdating}
+                onClick={() =>
+                  updateStatus({ id: tournament.id, data: { status: "ready" } })
+                }
+              >
                 <FolderTree />
                 Genera abbinamenti
               </Button>
@@ -147,10 +192,8 @@ const TournamentPage = () => {
           </div>
         )}
 
-        {tournament?.status !== "draft" && (
-          <div>
-            Ciao
-          </div>
+        {tournament && tournament.status !== "draft" && (
+          <GamesList tournament={tournament!} />
         )}
       </section>
     </>

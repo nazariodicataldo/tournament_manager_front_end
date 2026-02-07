@@ -17,7 +17,7 @@ export function AnimatedListItem({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <motion.div {...animations} layout className="w-[20%]">
+    <motion.div {...animations} layout className="w-full">
       {children}
     </motion.div>
   )
@@ -53,7 +53,7 @@ export const AnimatedList = React.memo(
 
     return (
       <div
-        className={cn(`flex flex-row flex-wrap items-center justify-between gap-8`, className)}
+        className={cn(`grid grid-cols-4 gap-8`, className)}
         {...props}
       >
         <AnimatePresence>
