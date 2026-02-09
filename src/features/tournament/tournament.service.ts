@@ -1,9 +1,11 @@
 import { myFetch } from "@/lib/backend";
 import {
+  ServerTournamentDashboardToTournamentDashboard,
   ServerTournamentToTournament,
   tournamentToServerTournament,
   type ServerTournament,
   type Tournament,
+  type TournamentDashboard,
 } from "./tournament.type";
 import myEnv from "@/lib/env";
 import {
@@ -13,9 +15,9 @@ import {
 } from "../game/game.type";
 
 export class TournamentService {
-  static async list(): Promise<Tournament[]> {
+  static async list(status?: Tournament["status"]): Promise<Tournament[]> {
     const tournaments = await myFetch<ServerTournament[]>(
-      `${myEnv.backendApiUrl}/tournaments`,
+      `${myEnv.backendApiUrl}/tournaments${status ? "?status=" + status : ""}`,
     );
 
     return tournaments.map(ServerTournamentToTournament);
@@ -36,12 +38,22 @@ export class TournamentService {
     return games.map(ServerGameToGame);
   }
 
-  static async rounds(id: Tournament["id"]): Promise<{[round: string]: string}[]> {
-    const rounds = await myFetch<{[round: string]: string}[]>(
+  static async rounds(
+    id: Tournament["id"],
+  ): Promise<{ [round: string]: string }[]> {
+    const rounds = await myFetch<{ [round: string]: string }[]>(
       `${myEnv.backendApiUrl}/tournaments/${id}/rounds`,
     );
 
     return rounds;
+  }
+
+  static async dashboard(id: number): Promise<TournamentDashboard> {
+    const dashboard = await myFetch<ServerTournament>(
+      `${myEnv.backendApiUrl}/tournaments/${id}/dashboard`,
+    );
+
+    return ServerTournamentDashboardToTournamentDashboard(dashboard);
   }
 
   static async create({

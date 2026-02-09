@@ -29,7 +29,7 @@ export type PlayerTeam = Player & { team: Team };
 const PlayerCard = ({ item }: { item: PlayerTeam }) => {
   const DialogContext = useDialogContext();
 
-  const { setOpenDialog, setMessage, /* setOpenForm  */} = DialogContext;
+  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
 
   const queryClient = useQueryClient();
 
@@ -37,10 +37,10 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
   const { mutate: deletePlayer, isPending: isDeleting } = useMutation({
     mutationFn: PlayerService.delete, //funzione che chiama l'endpoint per eliminare un giocatore
     onSettled: () => {
-        //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-        /* setOpenForm(false); */
-        setOpenDialog(true);
-      },
+      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+    },
     onError: (error: Error) => {
       setMessage(error.message);
     },
@@ -54,22 +54,22 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
   });
 
   //Mutation per aggiornare un giocatore
-  const { mutate: updatePlayer, isPending: isUpdating,  } = useMutation({
-      mutationFn: PlayerService.update, //funzione che chiama l'endpoint per creare un giocatore
-      onError: (error: Error) => {
-        setMessage(error.message);
-        setOpenDialog(true);
-      },
-      onSuccess: () => {
-        setMessage("Giocatore aggiornato con successo!");
-        /* setOpenForm(false); */
-        setOpenDialog(true);
-        queryClient.invalidateQueries({
-          //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'aggiornamento di un giocatore
-          queryKey: ["players"],
-        });
-      },
-    });
+  const { mutate: updatePlayer, isPending: isUpdating } = useMutation({
+    mutationFn: PlayerService.update, //funzione che chiama l'endpoint per creare un giocatore
+    onError: (error: Error) => {
+      setMessage(error.message);
+      setOpenDialog(true);
+    },
+    onSuccess: () => {
+      setMessage("Giocatore aggiornato con successo!");
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+      queryClient.invalidateQueries({
+        //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'aggiornamento di un giocatore
+        queryKey: ["players"],
+      });
+    },
+  });
 
   return (
     <Card key={item.id} className="w-full max-w-sm border gap-4 relative ">
@@ -91,6 +91,7 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
           <PopoverContent className={"w-40 flex flex-col gap-2"}>
             {/* Dialog per l'aggiornamento */}
             <UpdateDialog
+              text={"Modifica"}
               children={
                 <PlayerForm
                   isPending={isUpdating}
@@ -100,7 +101,11 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
               }
             />
             {/* Dialog per l'eliminazione */}
-            <DeleteDialog isPending={isDeleting} mutate={deletePlayer} id={item.id} />
+            <DeleteDialog
+              isPending={isDeleting}
+              mutate={deletePlayer}
+              id={item.id}
+            />
           </PopoverContent>
         </Popover>
       </CardHeader>
@@ -117,19 +122,19 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
             <span className="italic text-neutral-500">Nessun team</span>
           ) : (
             <>
-              <DynamicIcon
-                name={item.team.icon}
-                size={20}
-                style={{ color: item.team.color }}
-              />
-              <span style={{ color: item.team.color }}>{item.team.name}</span>
+              {item.team.icon && (
+                <DynamicIcon
+                  name={item.team.icon}
+                  size={20}
+                />
+              )}
+              <span>{item.team.name}</span>
             </>
           )}
         </p>
 
         {item.teamId && (
           <p
-            style={{ color: item.team.color }}
             className="flex items-center text-[16px] w-full pt-3 gap-1 border-t border-b-neutral-500"
           >
             <Shirt size={20} /> {item.number}

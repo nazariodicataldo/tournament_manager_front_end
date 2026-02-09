@@ -43,43 +43,40 @@ const TeamCard = ({ item }: { item: Team }) => {
   });
 
   //Mutation per aggiornare un torneo
-    const { mutate: updateTeam, isPending: isUpdating } = useMutation({
-      mutationFn: TeamService.update, //funzione che chiama l'endpoint per aggiornare un torneo
-      onError: (error: Error) => {
-        setMessage(error.message);
-        setOpenDialog(true);
-      },
-      onSuccess: () => {
-        setMessage("Squadra aggiornata con successo!");
-        /* setOpenForm(false); */
-        setOpenDialog(true);
-        queryClient.invalidateQueries({
-          //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo l'aggiornamento di una squadra
-          queryKey: ["teams"],
-        });
-      },
-    });
+  const { mutate: updateTeam, isPending: isUpdating } = useMutation({
+    mutationFn: TeamService.update, //funzione che chiama l'endpoint per aggiornare un torneo
+    onError: (error: Error) => {
+      setMessage(error.message);
+      setOpenDialog(true);
+    },
+    onSuccess: () => {
+      setMessage("Squadra aggiornata con successo!");
+      /* setOpenForm(false); */
+      setOpenDialog(true);
+      queryClient.invalidateQueries({
+        //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo l'aggiornamento di una squadra
+        queryKey: ["teams"],
+      });
+    },
+  });
 
   return (
     <Card
       key={item.id}
-      style={{ borderColor: item.color, backgroundColor: item.color + "10" }}
+      style={{
+        borderColor: item.color + "20",
+        backgroundColor: item.color + "10",
+      }}
       className="w-full max-w-sm border gap-4 relative "
     >
       <CardHeader className="flex justify-between">
         <CardTitle className="flex items-center gap-4">
-          <DynamicIcon
-            name={item.icon}
-            style={{ color: item.color }}
-            size={48}
-          />
+          {item.icon && <DynamicIcon name={item.icon} size={48} />}
           <Link
             to={`/teams/${item.id}`}
             className="after:absolute after:inset-0"
           >
-            <h2 className="text-xl font-medium" style={{ color: item.color }}>
-              {item.name}
-            </h2>
+            <h2 className="text-xl font-medium">{item.name}</h2>
           </Link>
         </CardTitle>
         <Popover>
@@ -94,10 +91,11 @@ const TeamCard = ({ item }: { item: Team }) => {
           <PopoverContent className={"w-40 flex flex-col gap-2"}>
             {/* Dialog per l'aggiornamento */}
             <UpdateDialog
+              text={"Modifica"}
               children={
                 <TeamForm
                   isPending={isUpdating}
-                  mutate={(args) => updateTeam({ ...args, id: item.id })}
+                  mutate={({ data }) => updateTeam({ id: item.id, data })}
                   defaultValues={item}
                 />
               }

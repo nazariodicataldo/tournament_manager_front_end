@@ -26,18 +26,32 @@ import {
 } from "lucide-react";
 import type { JSX } from "react";
 import type { Tournament } from "./tournament.type";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDialogContext } from "@/contexts/DialogContext";
 import { TournamentService } from "./tournament.service";
 import DeleteDialog from "@/components/DeleteDialog";
 import UpdateDialog from "@/components/UpdateDialog";
 import TournamentForm from "./TournamentForm";
+import { TeamTournamentService } from "../teamTournaments/teamTournament.service";
+import { DynamicIcon } from "lucide-react/dynamic";
 
 const TournamentCard = ({ item }: { item: Tournament }) => {
   const DialogContext = useDialogContext();
   const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
 
   const queryClient = useQueryClient();
+
+  //Query per prendermi la squadra vincitrice del torneo
+  const { data: dashboard } = useQuery({
+    queryKey: ["dashboard", { tournamentId: item.id }],
+    queryFn: () => TournamentService.dashboard(item.id),
+  });
+
+  //Query per prendermi le squadre iscritte al torneo
+  const { data: teams = [] } = useQuery({
+    queryKey: ["registered_teams", { tournamentId: item.id }],
+    queryFn: () => TeamTournamentService.list(item.id),
+  });
 
   //Mutation per eliminare un torneo
   const { mutate: deleteTournament, isPending: isDeleting } = useMutation({
@@ -91,7 +105,7 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
         return (
           <>
             <Check size={20} />
-            Torneo sta per cominciare
+            Pronto per cominciare
           </>
         );
 
@@ -146,6 +160,7 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
           <PopoverContent className={"w-40 flex flex-col gap-2"}>
             {/* Dialog per l'aggiornamento */}
             <UpdateDialog
+              text={"Modifica"}
               children={
                 <TournamentForm
                   isPending={isUpdating}
@@ -164,14 +179,34 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
         </Popover>
       </CardHeader>
       <CardContent>
-        <CardDescription className="flex flex-col gap-2">
-          <p className="flex text-sm font-semibold text-neutral-500 items-center gap-1">
-            {returnStatus(item.status)}
-          </p>
+        <CardDescription className="flex justify-between">
+          {/* Status del torneo */}
+          <div className="flex flex-col gap-2">
+            <p className="flex text-sm font-semibold text-neutral-500 items-center gap-1">
+              {returnStatus(item.status)}
+            </p>
 
-          <p className="flex text-sm text-neutral-500 items-center gap-1">
-            <Users size={20} /> {item.participantsNumber} squadre
-          </p>
+            {/* Mostro le squadre iscritte e il numero massimo di partecipanti */}
+            <p className="flex text-sm text-neutral-500 items-center gap-1">
+              <Users size={20} /> {teams.length} / {item.participantsNumber} squadre
+            </p>
+          </div>
+
+          {/* Mostro il vincitore se il torneo è conluso */}
+          {item.status === "completed" && dashboard?.winner && (
+            <div>
+              <p>Vincitore</p>
+              <p
+                style={{ color: dashboard.winner?.color }}
+                className="font-semibold"
+              >
+                {dashboard.winner.icon && (
+                  <DynamicIcon name={dashboard.winner.icon} />
+                )}
+                {dashboard.winner.name}
+              </p>
+            </div>
+          )}
         </CardDescription>
       </CardContent>
       <CardFooter className="flex justify-between items-center">

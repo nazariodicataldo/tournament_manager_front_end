@@ -1,6 +1,4 @@
 import CreateDialog from "@/components/CreateDialog";
-import { AnimatedList } from "@/components/ui/animated-list";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDialogContext } from "@/contexts/DialogContext";
 import GamesList from "@/features/game/GamesList";
@@ -8,8 +6,13 @@ import { TeamTournamentService } from "@/features/teamTournaments/teamTournament
 import TeamTournamentForm from "@/features/teamTournaments/TeamTournamentForm";
 import { TournamentService } from "@/features/tournament/tournament.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FolderTree, ShieldOff } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router";
+import Dashboard from "@/features/tournament/Dashboard";
+import DraftTournament from "@/features/tournament/DraftTournament";
+import EmptyError from "@/components/EmptyError";
+import type { TeamTournament } from "@/features/teamTournaments/teamTournament.type";
+import EmptyResult from "@/components/EmptyResult";
 
 const TournamentPage = () => {
   //Mi prendo l'id del team dai parametri dell'url
@@ -19,6 +22,16 @@ const TournamentPage = () => {
 
   const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
 
+  //Query per prendermi la squadra vincitrice del torneo
+  const {
+    data: dashboard,
+    isPending: fetchingDashboard,
+    isError: errorDashboard,
+  } = useQuery({
+    queryKey: ["dashboard", { tournamentId: +id! }],
+    queryFn: () => TournamentService.dashboard(+id!),
+  });
+
   //Query per prendere le info sul torneo
   const { data: tournament } = useQuery({
     queryKey: ["tournament", { id: +id! }],
@@ -27,9 +40,10 @@ const TournamentPage = () => {
 
   //Query per prendere i dati del team specifico
   const {
-    data: teamTournament,
+    data: teamTournament = [],
     isError,
     error,
+    refetch,
     isPending,
   } = useQuery({
     queryKey: ["team_tournaments", { id: +id! }],
@@ -118,8 +132,10 @@ const TournamentPage = () => {
           </h2>
 
           {/* Il pulsante per aggiungere la squadra è visibile solo se il torneo non è ancora pronto */}
+          {/* Quando il numero di partecipanti non è raggiunto, il bottone deve essere visibile */}
           {tournament?.status === "draft" && (
             <CreateDialog
+              disabled={tournament?.participantsNumber === teamTournament.length}
               text="Iscrivi squadra"
               children={
                 <TeamTournamentForm
@@ -132,69 +148,76 @@ const TournamentPage = () => {
           )}
         </div>
 
+        {/* Stato errore */}
         {isError && (
-          <p className="text-red-500">
-            Errore nel caricamento della squadra: {error.message} {error.stack}
-          </p>
+          <EmptyError<TeamTournament[]>
+            title={"Errore durante il carimento dei giocatori della squadra"}
+            error={error}
+            refetch={() => refetch()}
+          />
         )}
 
+        {/* Stato con 0 squadre */}
         {!isPending && teamTournament?.length === 0 && (
-          <p>Nessun giocatore in questa squadra.</p>
+          <EmptyResult
+            title="Nessuna squadra trovata"
+            description="Al momento non ci sono squadre iscritte al torneo"
+            text="Aggiungi squadra"
+            children={
+              <TeamTournamentForm
+                mutate={addTeam}
+                tournamentId={+id!}
+                isPending={isAdding}
+              />
+            }
+          />
         )}
 
-        {/* Sezione visibile solo quando il torneo non è ancora iniziato e quindi è nello status 'draft' */}
-        {tournament?.status === "draft" && (
-          <div>
-            <AnimatedList className="mt-4 min-h-[50vh]">
-              {isPending &&
-                new Array(4)
-                  .fill("")
-                  .map((_, pos) => (
-                    <Skeleton key={pos} className="max-w-3xs aspect-video" />
-                  ))}
-
-              {teamTournament?.reverse().map((t) => (
-                <div className="bg-secondary p-4 rounded-lg flex gap-2 items-center justify-between">
-                  <h3 className="font-semibold" style={{ color: t.team.color }}>
-                    {t.team.name}
-                  </h3>
-                  <Button
-                    variant={"destructive"}
-                    disabled={isRemoving}
-                    onClick={() =>
-                      removeTeam({
-                        teamId: t.teamId,
-                        tournamentId: tournament.id,
-                      })
-                    }
-                  >
-                    <ShieldOff />
-                    Rimuovi
-                  </Button>
-                </div>
-              ))}
-            </AnimatedList>
-
-            {/* Pulsante per generare gli abbinamenti tra squadre */}
-            {/* di fatto cambio lo status del torneo da draft a ready */}
-            <div className="flex justify-end w-full mt-16">
-              <Button
-                size={"lg"}
-                disabled={isUpdating}
-                onClick={() =>
-                  updateStatus({ id: tournament.id, data: { status: "ready" } })
-                }
-              >
-                <FolderTree />
-                Genera abbinamenti
-              </Button>
-            </div>
+        {/* Loading squadre */}
+        {isPending && (
+          <div className="grid grid-cols-4 gap-4 mt-4">
+            {new Array(8).fill("").map((_, pos) => (
+              <Skeleton key={pos} className="max-w-3xs aspect-video" />
+            ))}
           </div>
         )}
 
-        {tournament && tournament.status !== "draft" && (
-          <GamesList tournament={tournament!} />
-        )}
+        {/* body che contiene le partite e le statistiche */}
+        <div className="flex flex-col gap-12 md:flex-row justify-between">
+          {/* Sezione visibile solo quando il torneo non è ancora iniziato e quindi è nello status 'draft' */}
+          {tournament?.status === "draft" && (
+            <DraftTournament
+              tournamentId={+id!}
+              teamTournament={teamTournament}
+              removeTeam={removeTeam}
+              isRemoving={isRemoving}
+              updateStatus={updateStatus}
+              isUpdating={isUpdating}
+            />
+          )}
+
+          {tournament && tournament.status !== "draft" && (
+            <GamesList
+              lastGame={dashboard?.lastGame}
+              tournament={tournament!}
+            />
+          )}
+
+          {/* Rendering condizionale delle statistiche */}
+          {/* Loading con skeleton */}
+          {tournament && tournament.status !== "draft" && fetchingDashboard && (
+            <Skeleton className="w-md h-max" />
+          )}
+
+          {/* Mostro le statistiche */}
+          {tournament &&
+            tournament.status !== "draft" &&
+            !fetchingDashboard &&
+            !errorDashboard &&
+            dashboard && (
+              <Dashboard dashboard={dashboard} tournament={tournament} />
+            )}
+        </div>
       </section>
     </>
   );

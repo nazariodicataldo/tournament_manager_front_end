@@ -51,7 +51,6 @@ const GameForm = ({ mutate, isPending, game }: GameFormProps) => {
 
   //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
   function handleActionTeam(data: FormType) {
-    console.log(data);
     mutate({
       id: game.id,
       data: { goalA: +data.goalA, goalB: +data.goalB, status: "played" },

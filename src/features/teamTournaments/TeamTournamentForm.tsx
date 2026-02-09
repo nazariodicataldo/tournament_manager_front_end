@@ -3,17 +3,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
 import { useQuery } from "@tanstack/react-query";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { TeamTournamentService } from "./teamTournament.service";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /* Mi creo lo scheme della validazione */
 const schema = z.object({
-  teamId: z.number(),
+  teamId: z
+    .array(z.number().positive())
+    .min(1, "Devi selezionare almeno una squadra"),
 });
 
 /* Mi creo il tipo dato dallo schema di validazione */
@@ -21,7 +27,13 @@ type FormType = z.infer<typeof schema>;
 
 //Tipo delle props del componente
 type TeamTournamentFormProps = {
-  mutate: ({ tournamentId, teamId }: { teamId: FormType['teamId'], tournamentId: number }) => void;
+  mutate: ({
+    tournamentId,
+    teamId,
+  }: {
+    teamId: number;
+    tournamentId: number;
+  }) => void;
   isPending?: boolean;
   tournamentId: number;
 };
@@ -32,15 +44,15 @@ const TeamTournamentForm = ({
   isPending,
 }: TeamTournamentFormProps) => {
   //Query per prendere tutte le squadre e mostrarle nel select del form
-  const { data: teams = [] } = useQuery({
+  const { data: teams = [], isPending: isLoading } = useQuery({
     queryKey: ["free_teems", { id: tournamentId }],
     queryFn: () => TeamTournamentService.free_teams(+tournamentId),
   });
 
   //Mi prendo le funzioni di react-hook-form
   const {
-    register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormType>({
     resolver: zodResolver(schema), //collego zod a react hook form
@@ -48,10 +60,13 @@ const TeamTournamentForm = ({
 
   //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
   function handleActionTeam(data: FormType) {
-    mutate({
-      tournamentId: +tournamentId!,
-      teamId: data.teamId
-    }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
+    //se l'utente inserisce più squadre, itero sull'array risultante
+    data.teamId.forEach((team) => { 
+      mutate({
+        tournamentId: +tournamentId!,
+        teamId: team,
+      }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
+    });
   }
 
   return (
@@ -64,17 +79,32 @@ const TeamTournamentForm = ({
           <label htmlFor="team" className="font-medium">
             Ruolo
           </label>
-          <NativeSelect
-            className="w-full"
+          <Select
+            multiple
+            onValueChange={(value) => {
+              if (value) {
+                setValue("teamId", [...value] as number[]);
+              }
+            }}
+            items={teams.map((team) => ({ label: team.name, value: team.id }))}
             id="team"
-            {...register("teamId", { valueAsNumber: true })}
           >
-            {teams.map((team) => (
-              <NativeSelectOption key={team.id} value={team.id}>
-                {capitalizeFirstLetter(team.name)}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selezona squadra" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {!isLoading &&
+                  teams
+                    .map((team) => ({ label: team.name, value: team.id }))
+                    .map((team) => (
+                      <SelectItem key={team.value} value={team.value}>
+                        {capitalizeFirstLetter(team.label)}
+                      </SelectItem>
+                    ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           {errors.teamId && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.teamId.message}

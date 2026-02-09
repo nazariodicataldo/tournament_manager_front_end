@@ -1,11 +1,14 @@
 import CreateDialog from "@/components/CreateDialog";
 import DeleteDialog from "@/components/DeleteDialog";
+import EmptyError from "@/components/EmptyError";
+import EmptyResult from "@/components/EmptyResult";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDialogContext } from "@/contexts/DialogContext";
 import { PlayerService } from "@/features/player/player.service";
 import type { Player } from "@/features/player/player.type";
-import PlayerTeamForm, { type MutationArgs } from "@/features/playerTeam/PlayerTeamForm";
+import PlayerTeamForm from "@/features/playerTeam/PlayerTeamForm";
 import { TeamService } from "@/features/team/team.service";
+import type { Team } from "@/features/team/team.type";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Shirt } from "lucide-react";
@@ -19,6 +22,8 @@ const TeamPage = () => {
   const {
     data: team,
     isError,
+    error,
+    refetch,
     isPending,
   } = useQuery({
     queryKey: ["teams", { id: +id! }],
@@ -96,13 +101,39 @@ const TeamPage = () => {
             text="Aggiungi giocatore alla squadra"
             children={
               <PlayerTeamForm
-                mutate={(args) => addPlayer(args as MutationArgs)}
+                mutate={addPlayer}
                 teamId={+id!}
                 isPending={isAdding}
               />
             }
           />
         </div>
+
+        {/* Stato errore */}
+        {isError && (
+          <EmptyError<Team>
+            title={"Errore durante il carimento dei giocatori della squadra"}
+            error={error}
+            refetch={() => refetch()}
+          />
+        )}
+
+        {/* Stato con 0 squadre */}
+        {!isPending && !isError && team.players!.length === 0 && (
+          <EmptyResult
+            title="Nessun giocatore trovato"
+            description="Al momento non ci sono giocatori aggiunti alla squadra"
+            text="Aggiungi giocatore"
+            children={
+              <PlayerTeamForm
+                mutate={addPlayer}
+                teamId={+id!}
+                isPending={isAdding}
+              />
+            }
+          />
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isPending &&
             new Array(6)
@@ -110,16 +141,6 @@ const TeamPage = () => {
               .map((_, pos) => (
                 <Skeleton key={pos} className="max-w-sm aspect-video" />
               ))}
-
-          {isError && (
-            <p className="text-red-500">
-              Errore nel caricamento dei giocatori.
-            </p>
-          )}
-
-          {!isPending && team?.players!.length === 0 && (
-            <p>Nessun giocatore in questa squadra.</p>
-          )}
 
           {!isPending &&
             team?.players!.map((player: Player) => (

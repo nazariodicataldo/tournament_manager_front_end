@@ -36,6 +36,11 @@ const navigation: NavigationType[] = [
     url: "/players",
     icon: "user",
   },
+  {
+    title: "History",
+    url: "/history",
+    icon: "history",
+  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

@@ -34,7 +34,7 @@ export class PlayerService {
   static async create({
     data,
   }: {
-    data: Omit<Player, "id">;
+    data: Omit<Player, "id" | "createdAt" | "updatedAt">;
   }): Promise<Player> {
     const player = await myFetch<ServerPlayer>(
       `${myEnv.backendApiUrl}/players`,

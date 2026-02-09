@@ -15,6 +15,9 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 
+//array con tutte le 30 icone di lucide
+const icons = iconNames.slice(0, 40);
+
 /* Mi creo lo scheme della validazione */
 const schema = z.object({
   name: z
@@ -28,13 +31,9 @@ const schema = z.object({
     .regex(/^#([0-9A-Fa-f]{6})$/, "Deve essere un codice colore HEX valido"),
   icon: z
     .custom<IconName>()
-    .refine(
-      (val): val is IconName =>
-        iconNames.slice(0, 30).includes(val as IconName),
-      {
-        message: "Icona non valida",
-      },
-    ),
+    .refine((val): val is IconName => icons.includes(val as IconName), {
+      message: "Icona non valida",
+    }),
 });
 
 /* Mi creo il tipo dato dallo schema di validazione */
@@ -42,7 +41,7 @@ type FormType = z.infer<typeof schema>;
 
 //Tipo delle props del componente
 type TeamFormProps = {
-  mutate: (args: { data: FormType; id?: number }) => void;
+  mutate: ({ data, id }: { data: Omit<FormType, "id">; id?: number }) => void;
   isPending?: boolean;
   defaultValues?: Team;
 };
@@ -112,7 +111,7 @@ const TeamForm = ({ mutate, defaultValues, isPending }: TeamFormProps) => {
             defaultValue={defaultValues?.icon as string}
             defaultInputValue={defaultValues?.icon as string}
             onValueChange={(value) => setValue("icon", value as IconName)}
-            items={iconNames.slice(0, 30)}
+            items={icons}
             id="icon"
             {...register("icon")}
           >
@@ -120,11 +119,11 @@ const TeamForm = ({ mutate, defaultValues, isPending }: TeamFormProps) => {
             <ComboboxContent>
               <ComboboxEmpty>Icona non trovata</ComboboxEmpty>
               <ComboboxList>
-                {iconNames.slice(0, 30).map((iconName) => (
-                  <ComboboxItem key={iconName} value={iconName}>
-                    <DynamicIcon name={iconName} className="mr-2" /> {iconName}
+                {(icons) => (
+                  <ComboboxItem key={icons} value={icons}>
+                    <DynamicIcon name={icons} className="mr-2" /> {icons}
                   </ComboboxItem>
-                ))}
+                )}
               </ComboboxList>
             </ComboboxContent>
           </Combobox>

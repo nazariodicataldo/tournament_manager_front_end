@@ -41,7 +41,7 @@ const roles = ["portiere", "difensore", "centrocampista", "attaccante"];
 
 //Tipo delle props del componente
 type PlayerFormProps = {
-  mutate: (args: { data: PlayerFormType; id?: number }) => void;
+  mutate: ({ data, id }: { data: Omit<PlayerFormType, "id">; id?: number }) => void;
   isPending?: boolean;
   defaultValues?: PlayerFormType & { id: number };
 };

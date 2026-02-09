@@ -5,12 +5,17 @@ import TeamCard from "./TeamCard";
 import { useDialogContext } from "@/contexts/DialogContext";
 import CreateDialog from "@/components/CreateDialog";
 import TeamForm from "./TeamForm";
+import EmptyError from "@/components/EmptyError";
+import type { Team } from "./team.type";
+import EmptyResult from "@/components/EmptyResult";
 
 const TeamsList = () => {
   const {
     data: teams = [],
     isPending,
-    /* isError, */
+    isError,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ["teams"],
     queryFn: TeamService.list,
@@ -49,11 +54,28 @@ const TeamsList = () => {
         </h1>
         <CreateDialog
           text="Aggiungi Squadra"
-          children={
-            <TeamForm mutate={createTeam} isPending={isCreating} />
-          }
+          children={<TeamForm mutate={createTeam} isPending={isCreating} />}
         />
       </header>
+
+      {/* Stato errore */}
+      {isError && (
+        <EmptyError<Team[]>
+          title={"Errore durante il carimento delle squadre"}
+          error={error}
+          refetch={() => refetch()}
+        />
+      )}
+
+      {/* Stato con 0 squadre */}
+      {!isError && !isPending && teams.length === 0 && (
+        <EmptyResult
+          title="Nessuna squadra trovata"
+          description="Al momento non ci sono squadre salvate nel database"
+          text="Crea squadra"
+          children={<TeamForm mutate={createTeam} isPending={isCreating} />}
+        />
+      )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Stato Loading */}
@@ -65,9 +87,9 @@ const TeamsList = () => {
             ))}
 
         {/* Rendering cards */}
-        {teams.map((team) => (
-          <TeamCard item={team} />
-        ))}
+        {!isPending &&
+          !isError &&
+          teams.map((team) => <TeamCard key={team.id} item={team} />)}
       </section>
     </>
   );

@@ -6,7 +6,11 @@ import {
   type ServerTeamTournament,
   type TeamTournament,
 } from "./teamTournament.type";
-import { ServerTeamToTeam, type ServerTeam, type Team } from "../team/team.type";
+import {
+  ServerTeamToTeam,
+  type ServerTeam,
+  type Team,
+} from "../team/team.type";
 
 export class TeamTournamentService {
   static async free_teams(

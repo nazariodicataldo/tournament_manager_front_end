@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import MessageDialog from "./MessageDialog";
 import { useDialogContext } from "@/contexts/DialogContext";
 
-type CreateDialogProps = {
+export type CreateDialogProps = {
   text: string;
   children: React.ReactNode;
   disabled?: boolean;
