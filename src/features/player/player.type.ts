@@ -3,8 +3,8 @@ export type Player = {
   firstName: string;
   lastName: string;
   role: "portiere" | "difensore" | "centrocampista" | "attaccante";
-  number: number | null;
-  teamId: number | null;
+  number?: number;
+  teamId?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -14,8 +14,8 @@ export type ServerPlayer = {
   first_name: string;
   last_name: string;
   role: "portiere" | "difensore" | "centrocampista" | "attaccante";
-  number: number | null;
-  team_id: number | null;
+  number?: number;
+  team_id?: number;
   created_at: string;
   updated_at: string;
 };

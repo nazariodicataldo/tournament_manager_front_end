@@ -8,6 +8,7 @@ import TeamForm from "./TeamForm";
 import EmptyError from "@/components/EmptyError";
 import type { Team } from "./team.type";
 import EmptyResult from "@/components/EmptyResult";
+import { toast } from "sonner";
 
 const TeamsList = () => {
   const {
@@ -22,23 +23,18 @@ const TeamsList = () => {
   });
 
   //Ci prendiamo le funzioni per gestire la dialog e il messaggio da mostrare nella dialog dal DialogContext, in modo da poterle utilizzare nella mutation di creazione del torneo per mostrare un messaggio di successo o errore dopo la creazione di un nuovo torneo
-  const { setOpenDialog, setMessage /* setOpenForm */ } = useDialogContext();
+  const { setOpenForm } = useDialogContext();
 
   const queryClient = useQueryClient(); //essenziale per invalidare la query dei giocatori dopo la creazione di un nuovo giocatore
 
   const { mutate: createTeam, isPending: isCreating } = useMutation({
     mutationFn: TeamService.create, //funzione che chiama l'endpoint per creare un giocatore
-    onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
-    },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Squadra creata con successo!");
-      /* setOpenForm(false); */
+      setOpenForm(false);
+      toast.success("Squadra creata con successo!", { position: "bottom-right" });
       queryClient.invalidateQueries({
         //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo la creazione di una nuova squadra
         queryKey: ["teams"],

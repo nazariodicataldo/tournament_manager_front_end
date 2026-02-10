@@ -11,6 +11,7 @@ import PlayersList from "./features/player/PlayersList";
 import DialogContextProvider from "./contexts/DialogContext";
 import TeamPage from "./pages/TeamPage";
 import HistoryTournament from "./pages/HistoryTournament";
+import NotFoundPage from "./pages/NotFoundPage";
 
 
 // This code is only for TypeScript
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "*",
+    element: <NotFoundPage />
+  }
 ]);
 
 const queryClient = new QueryClient({});

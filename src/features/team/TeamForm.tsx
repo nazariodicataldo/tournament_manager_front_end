@@ -78,8 +78,9 @@ const TeamForm = ({ mutate, defaultValues, isPending }: TeamFormProps) => {
 
         {/* Name */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="font-medium">
+          <label htmlFor="name" className="font-medium flex gap-1">
             Nome della squadra
+            <span className="text-red-400">*</span>
           </label>
           <Input id="name" {...register("name")} placeholder="Juventus" />
           {errors.name && (
@@ -91,10 +92,11 @@ const TeamForm = ({ mutate, defaultValues, isPending }: TeamFormProps) => {
 
         {/* Color */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="color" className="font-medium">
+          <label htmlFor="color" className="font-medium flex gap-1">
             Colore della squadra
+            <span className="text-red-400">*</span>
           </label>
-          <Input type="color" id="color" {...register("color")} />
+          <Input type="color" id="color" {...register("color")} className="h-6" />
           {errors.color && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.color.message}
@@ -104,8 +106,9 @@ const TeamForm = ({ mutate, defaultValues, isPending }: TeamFormProps) => {
 
         {/* Icon*/}
         <div className="flex flex-col gap-1">
-          <label htmlFor="icon" className="font-medium">
+          <label htmlFor="icon" className="font-medium flex gap-1">
             Icona della squadra
+            <span className="text-red-400">*</span>
           </label>
           <Combobox
             defaultValue={defaultValues?.icon as string}

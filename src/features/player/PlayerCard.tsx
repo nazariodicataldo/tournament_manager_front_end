@@ -23,13 +23,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDialogContext } from "@/contexts/DialogContext";
 import UpdateDialog from "@/components/UpdateDialog";
 import PlayerForm, { type PlayerFormType } from "./PlayerForm";
+import { toast } from "sonner";
 
 export type PlayerTeam = Player & { team: Team };
 
 const PlayerCard = ({ item }: { item: PlayerTeam }) => {
   const DialogContext = useDialogContext();
 
-  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+  const { setOpenUpdateForm, setOpenDeleteForm } = DialogContext;
 
   const queryClient = useQueryClient();
 
@@ -37,15 +38,13 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
   const { mutate: deletePlayer, isPending: isDeleting } = useMutation({
     mutationFn: PlayerService.delete, //funzione che chiama l'endpoint per eliminare un giocatore
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenDeleteForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Giocatore eliminato con successo!");
+      toast.success("Giocatore eliminato con successo!", { position: "bottom-right" });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
         queryKey: ["players"],
@@ -57,13 +56,11 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
   const { mutate: updatePlayer, isPending: isUpdating } = useMutation({
     mutationFn: PlayerService.update, //funzione che chiama l'endpoint per creare un giocatore
     onError: (error: Error) => {
-      setMessage(error.message);
-      setOpenDialog(true);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Giocatore aggiornato con successo!");
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenUpdateForm(false);
+      toast.success("Giocatore aggiornato con successo!", { position: "bottom-right" });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'aggiornamento di un giocatore
         queryKey: ["players"],
@@ -123,10 +120,7 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
           ) : (
             <>
               {item.team.icon && (
-                <DynamicIcon
-                  name={item.team.icon}
-                  size={20}
-                />
+                <DynamicIcon name={item.team.icon} size={20} />
               )}
               <span>{item.team.name}</span>
             </>
@@ -134,9 +128,7 @@ const PlayerCard = ({ item }: { item: PlayerTeam }) => {
         </p>
 
         {item.teamId && (
-          <p
-            className="flex items-center text-[16px] w-full pt-3 gap-1 border-t border-b-neutral-500"
-          >
+          <p className="flex items-center text-[16px] w-full pt-3 gap-1 border-t border-b-neutral-500">
             <Shirt size={20} /> {item.number}
           </p>
         )}

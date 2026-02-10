@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import MessageDialog from "./MessageDialog";
 import { useDialogContext } from "@/contexts/DialogContext";
 
 type UpdateDialogProps = {
@@ -11,12 +10,12 @@ type UpdateDialogProps = {
 
 const UpdateDialog = ({ children, text }: UpdateDialogProps) => {
   //Uso del contesto per gestire lo stato della dialog e il messaggio
-  /* const { openUpdateForm, setOpenUpdateForm } = useDialogContext(); */
+  const { openUpdateForm, setOpenUpdateForm } = useDialogContext();
 
   return (
     <>
       {/* Dialog che contiene il form */}
-      <Dialog /* open={openUpdateForm} onOpenChange={setOpenUpdateForm} */>
+      <Dialog open={openUpdateForm} onOpenChange={setOpenUpdateForm}>
         <DialogTrigger
           nativeButton={false}
           render={
@@ -28,9 +27,6 @@ const UpdateDialog = ({ children, text }: UpdateDialogProps) => {
         />
         <DialogContent className="sm:max-w-md">{children}</DialogContent>
       </Dialog>
-
-      {/* Dialog di messaggio dopo l'invio del form   */}
-      <MessageDialog />
     </>
   );
 };

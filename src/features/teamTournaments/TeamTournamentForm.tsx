@@ -18,7 +18,9 @@ import {
 /* Mi creo lo scheme della validazione */
 const schema = z.object({
   teamId: z
-    .array(z.number().positive())
+    .array(z.number().positive(), {
+      error: "Devi selezionare almeno una squadra",
+    })
     .min(1, "Devi selezionare almeno una squadra"),
 });
 
@@ -61,7 +63,7 @@ const TeamTournamentForm = ({
   //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
   function handleActionTeam(data: FormType) {
     //se l'utente inserisce più squadre, itero sull'array risultante
-    data.teamId.forEach((team) => { 
+    data.teamId.forEach((team) => {
       mutate({
         tournamentId: +tournamentId!,
         teamId: team,
@@ -76,8 +78,9 @@ const TeamTournamentForm = ({
 
         {/* Team */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="team" className="font-medium">
-            Ruolo
+          <label htmlFor="team" className="font-medium flex gap-1">
+            Squadra
+            <span className="text-red-400">*</span>
           </label>
           <Select
             multiple
@@ -90,7 +93,7 @@ const TeamTournamentForm = ({
             id="team"
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selezona squadra" />
+              <SelectValue placeholder="Seleziona squadra" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>

@@ -59,7 +59,7 @@ export class TournamentService {
   static async create({
     data,
   }: {
-    data: Omit<Tournament, "id" | "createdAt" | "updatedAt">;
+    data: Omit<Tournament, "id" | "createdAt" | "updatedAt" | "status">;
   }): Promise<Tournament> {
     console.log(data);
     const tournament = await myFetch<ServerTournament>(
@@ -78,7 +78,7 @@ export class TournamentService {
     data,
   }: {
     id: number;
-    data: Omit<Partial<Tournament>, "id" | "createdAt" | "updatedAt">;
+    data: Omit<Partial<Tournament>, "id" | "createdAt" | "updatedAt" | "status">;
   }): Promise<Tournament> {
     //Con Partial rendo tutti i campi del tipo opzionali
     const tournament = await myFetch<ServerTournament>(

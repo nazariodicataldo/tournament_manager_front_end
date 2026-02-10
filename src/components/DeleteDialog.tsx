@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldOff, Trash2 } from "lucide-react";
-import MessageDialog from "./MessageDialog";
+import { useDialogContext } from "@/contexts/DialogContext";
 
 type DeleteDialogProps = {
   mutate?: (id: number) => void;
@@ -30,11 +30,11 @@ function DeleteDialog({
   updateMutate,
 }: DeleteDialogProps) {
   //uso del context per gestire l'apertura della dialog di messaggio e il messaggio da mostrare
-  /* const { openDeleteForm, setOpenDeleteForm } = useDialogContext(); */
+  const { openDeleteForm, setOpenDeleteForm } = useDialogContext();
 
   return (
     <>
-      <AlertDialog /* open={openDeleteForm} onOpenChange={setOpenDeleteForm} */>
+      <AlertDialog open={openDeleteForm} onOpenChange={setOpenDeleteForm}>
         <AlertDialogTrigger
           nativeButton={false}
           render={
@@ -71,9 +71,6 @@ function DeleteDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Dialog di messaggio dopo l'invio del form   */}
-      <MessageDialog />
     </>
   );
 }

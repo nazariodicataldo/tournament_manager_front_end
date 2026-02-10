@@ -3,10 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-/* import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select"; */
 import type { Tournament } from "./tournament.type";
 import { Loader2 } from "lucide-react";
 
@@ -19,33 +15,19 @@ const schema = z.object({
   year: z
     .number("L'anno deve essere un numero")
     .min(1900, "L'anno deve essere maggiore di 1900")
-    .max(2100, "L'anno non può superare 2100"),
+    .max(2029, "L'anno non può superare 2100"),
   place: z
     .string()
     .min(2, "Il luogo deve contenere almeno 2 caratteri")
     .max(40, "Il luogo non può superare i 40 caratteri"),
-  /* status: z
-    .enum(["draft", "ready", "in_progress", "completed"], "Stato non valido")
-    .optional(), */
   participantsNumber: z
-    .number("Devi inserire un numero di maglia")
+    .number("Devi inserire un numero valido")
     .min(2, "Il numero deve essere almeno 2")
     .max(16, "Il numero non può superare 16"),
 });
 
 /* Mi creo il tipo dato dallo schema di validazione */
 type FormType = z.infer<typeof schema>;
-
-//Ruoli disponibili
-/* const status = [
-  {
-    text: "Bozza",
-    value: "draft",
-  },
-  { text: "Pronto", value: "ready" },
-  { text: "In Corso", value: "in_progress" },
-  { text: "Completato", value: "completed" },
-]; */
 
 //Tipo delle props del componente
 type TournamentFormProps = {
@@ -71,7 +53,10 @@ const TournamentForm = ({
 
   //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
   function handleActionTournament(data: FormType) {
-    mutate({ data, id: defaultValues?.id }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
+    mutate({
+      data: { ...data },
+      id: defaultValues?.id,
+    }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
   }
 
   return (
@@ -86,8 +71,9 @@ const TournamentForm = ({
 
         {/* Name */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="font-medium">
+          <label htmlFor="name" className="font-medium flex gap-1">
             Nome del torneo
+            <span className="text-red-400">*</span>
           </label>
           <Input id="name" {...register("name")} placeholder="Coppa Italia" />
           {errors.name && (
@@ -99,11 +85,11 @@ const TournamentForm = ({
 
         {/* Year */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="year" className="font-medium">
+          <label htmlFor="year" className="font-medium flex gap-1">
             Anno di inizio
+            <span className="text-red-400">*</span>
           </label>
           <Input
-            type="number"
             id="year"
             {...register("year", { valueAsNumber: true })}
             placeholder="2026"
@@ -117,8 +103,9 @@ const TournamentForm = ({
 
         {/* Place */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="place" className="font-medium">
+          <label htmlFor="place" className="font-medium flex gap-1">
             Località del torneo
+            <span className="text-red-400">*</span>
           </label>
           <Input id="place" {...register("place")} placeholder="Roma" />
           {errors.place && (
@@ -128,50 +115,27 @@ const TournamentForm = ({
           )}
         </div>
 
-        {/* Status */}
-        {/* {defaultValues && ( //Stato non modificabile in fase di creazione, ma solo in fase di aggiornamento
+        {/* Participants Number */}
+        {/* Il numero di partecipanti è modificabile solo quando lo status del torneo è in draft */}
+        {/* Oppure se i defaultValues non ci sono e quindi sono in fase di create */}
+        {(!defaultValues || defaultValues?.status === "draft") && (
           <div className="flex flex-col gap-1">
-            <label htmlFor="status" className="font-medium">
-              Stato del torneo
+            <label htmlFor="participantsNumber" className="font-medium flex gap-1">
+              Numero di partecipanti
+              <span className="text-red-400">*</span>
             </label>
-            <NativeSelect
-              className="w-full"
-              id="status"
-              {...register("status")}
-            >
-              {status.map((status) => (
-                <NativeSelectOption key={status.value} value={status.value}>
-                  {status.text}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            {errors.status && (
+            <Input
+              id="participantsNumber"
+              {...register("participantsNumber", { valueAsNumber: true })}
+              placeholder="2"
+            />
+            {errors.participantsNumber && (
               <p className="text-sm text-red-400" aria-live="polite">
-                {errors.status.message}
+                {errors.participantsNumber.message}
               </p>
             )}
           </div>
-        )} */}
-
-        {/* Participants Number */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="participantsNumber" className="font-medium">
-            Numero di partecipanti
-          </label>
-          <Input
-            min={1}
-            max={99}
-            type="number"
-            id="participantsNumber"
-            {...register("participantsNumber", { valueAsNumber: true })}
-            placeholder="1"
-          />
-          {errors.participantsNumber && (
-            <p className="text-sm text-red-400" aria-live="polite">
-              {errors.participantsNumber.message}
-            </p>
-          )}
-        </div>
+        )}
 
         <Button
           disabled={isPending}

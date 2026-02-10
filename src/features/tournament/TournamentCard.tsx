@@ -33,22 +33,24 @@ import DeleteDialog from "@/components/DeleteDialog";
 import UpdateDialog from "@/components/UpdateDialog";
 import TournamentForm from "./TournamentForm";
 import { TeamTournamentService } from "../teamTournaments/teamTournament.service";
-import { DynamicIcon } from "lucide-react/dynamic";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TournamentCard = ({ item }: { item: Tournament }) => {
   const DialogContext = useDialogContext();
-  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+
+  const { setOpenUpdateForm, setOpenDeleteForm } = DialogContext;
 
   const queryClient = useQueryClient();
 
   //Query per prendermi la squadra vincitrice del torneo
-  const { data: dashboard } = useQuery({
+  const { data: dashboard, isPaused: fetchingDashboard } = useQuery({
     queryKey: ["dashboard", { tournamentId: item.id }],
     queryFn: () => TournamentService.dashboard(item.id),
   });
 
   //Query per prendermi le squadre iscritte al torneo
-  const { data: teams = [] } = useQuery({
+  const { data: teams = [], isPending: fetchngTeam } = useQuery({
     queryKey: ["registered_teams", { tournamentId: item.id }],
     queryFn: () => TeamTournamentService.list(item.id),
   });
@@ -57,15 +59,15 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
   const { mutate: deleteTournament, isPending: isDeleting } = useMutation({
     mutationFn: TournamentService.delete, //funzione che chiama l'endpoint per eliminare un torneo
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenDeleteForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Torneo eliminato con successo!");
+      toast.success("Torneo eliminato con successo!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei tornei per rifetchare la lista aggiornata dopo l'eliminazione di un torneo
         queryKey: ["tournaments"],
@@ -77,13 +79,13 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
   const { mutate: updateTournament, isPending: isUpdating } = useMutation({
     mutationFn: TournamentService.update, //funzione che chiama l'endpoint per aggiornare un torneo
     onError: (error: Error) => {
-      setMessage(error.message);
-      setOpenDialog(true);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Torneo aggiornato con successo!");
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenUpdateForm(false);
+      toast.success("Torneo aggiornato con successo!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei tornei per rifetchare la lista aggiornata dopo l'aggiornamento di un torneo
         queryKey: ["tournaments"],
@@ -169,6 +171,7 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
                 />
               }
             />
+
             {/* Dialog per l'eliminazione */}
             <DeleteDialog
               isPending={isDeleting}
@@ -186,27 +189,32 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
               {returnStatus(item.status)}
             </p>
 
+            {/* Skeleton partecipanti */}
+            {fetchngTeam && <Skeleton className="w-20 h-4" />}
+
             {/* Mostro le squadre iscritte e il numero massimo di partecipanti */}
-            <p className="flex text-sm text-neutral-500 items-center gap-1">
-              <Users size={20} /> {teams.length} / {item.participantsNumber} squadre
-            </p>
+            {!fetchngTeam && (
+              <p className="flex text-sm text-neutral-500 items-center gap-1">
+                <Users size={20} /> {teams.length} /{item.participantsNumber}{" "}
+                squadre
+              </p>
+            )}
           </div>
 
+          {/* Skeleton vincitore */}
+          {item.status === "completed" &&
+            dashboard?.winner &&
+            fetchingDashboard && <Skeleton className="w-16 h-8" />}
+
           {/* Mostro il vincitore se il torneo è conluso */}
-          {item.status === "completed" && dashboard?.winner && (
-            <div>
-              <p>Vincitore</p>
-              <p
-                style={{ color: dashboard.winner?.color }}
-                className="font-semibold"
-              >
-                {dashboard.winner.icon && (
-                  <DynamicIcon name={dashboard.winner.icon} />
-                )}
-                {dashboard.winner.name}
-              </p>
-            </div>
-          )}
+          {item.status === "completed" &&
+            dashboard?.winner &&
+            !fetchingDashboard && (
+              <div>
+                <p>Vincitore</p>
+                <p className="font-semibold">{dashboard.winner.name}</p>
+              </div>
+            )}
         </CardDescription>
       </CardContent>
       <CardFooter className="flex justify-between items-center">

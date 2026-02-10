@@ -14,7 +14,7 @@ export type Tournament = {
   name: string;
   year: number;
   place: string;
-  status?: "draft" | "ready" | "in_progress" | "completed";
+  status: "draft" | "ready" | "in_progress" | "completed";
   winner?: Team;
   participantsNumber: number;
   createdAt: string;
@@ -82,7 +82,7 @@ export function tournamentToServerTournament(
 
   return {
     ...rest,
-    status: input.status ?? "draft",
+    status: input.status,
     participants_number: participantsNumber,
     created_at: createdAt,
     updated_at: updatedAt,

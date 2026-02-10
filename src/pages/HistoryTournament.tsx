@@ -7,7 +7,7 @@ import { TournamentService } from "@/features/tournament/tournament.service";
 import type { Tournament } from "@/features/tournament/tournament.type";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, MapPin } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
+/* import { DynamicIcon } from "lucide-react/dynamic"; */
 import { Link } from "react-router";
 
 const HistoryTournament = () => {
@@ -25,7 +25,7 @@ const HistoryTournament = () => {
 
   return (
     <>
-      <header className="mt-8 grid grid-cols-3">
+      <header className="mt-8 grid grid-cols-1">
         <h1 className="text-2xl text-primary font-semibold">
           Cronologia dei tornei conclusi
         </h1>
@@ -72,9 +72,9 @@ const HistoryTournament = () => {
                     to={`/teams/${tournament.winner?.id}`}
                     className="font-medium text-lg relative z-40"
                   >
-                    {tournament.winner?.icon && (
+                    {/* {tournament.winner?.icon && (
                       <DynamicIcon size={20} name={tournament.winner.icon} />
-                    )}
+                    )} */}
                     {tournament.winner?.name}
                   </Link>
                 </p>

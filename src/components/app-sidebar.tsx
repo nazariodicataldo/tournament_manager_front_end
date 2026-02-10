@@ -55,20 +55,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {navigation.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="flex flex-row justify-center">
                 <SidebarMenuButton
                   render={
                     <NavLink
                       title={item.title}
                       to={item.url}
-                      className={cn(
-                        "flex gap-2 items-center text-lg",
-                        pathname === item.url && "bg-primary/50 text-primary-foreground",
+                      className={cn( 
+                        "justify-center",
+                        pathname === item.url && "bg-primary/50 hover:bg-primary/50 text-primary-foreground",
                       )}
                     />
                   }
                 >
-                  <DynamicIcon name={item.icon} size={48} />
+                  <DynamicIcon name={item.icon} size={48} className="size-6!"  />
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroupContent>

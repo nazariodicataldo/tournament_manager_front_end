@@ -13,6 +13,7 @@ import DraftTournament from "@/features/tournament/DraftTournament";
 import EmptyError from "@/components/EmptyError";
 import type { TeamTournament } from "@/features/teamTournaments/teamTournament.type";
 import EmptyResult from "@/components/EmptyResult";
+import { toast } from "sonner";
 
 const TournamentPage = () => {
   //Mi prendo l'id del team dai parametri dell'url
@@ -20,7 +21,7 @@ const TournamentPage = () => {
 
   const DialogContext = useDialogContext();
 
-  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+  const { setOpenForm, setOpenDeleteForm, setOpenUpdateForm } = DialogContext;
 
   //Query per prendermi la squadra vincitrice del torneo
   const {
@@ -56,15 +57,15 @@ const TournamentPage = () => {
   const { mutate: removeTeam, isPending: isRemoving } = useMutation({
     mutationFn: TeamTournamentService.delete, //funzione che chiama l'endpoint per aggiungere il giocatore
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenDeleteForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Squadra rimossa con successo");
+      toast.success("Squadra rimossa con successo!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
         queryKey: ["team_tournaments", { id: +id! }],
@@ -76,15 +77,15 @@ const TournamentPage = () => {
   const { mutate: addTeam, isPending: isAdding } = useMutation({
     mutationFn: TeamTournamentService.create, //funzione che chiama l'endpoint per aggiungere il giocatore
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Squadra aggiunta con successo");
+      toast.success("Squadra aggiunta al torneo con successo!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
         queryKey: ["team_tournaments", { id: +id! }],
@@ -95,16 +96,14 @@ const TournamentPage = () => {
   //Mutation per modificare lo status del torneo e quindi generare abbinamenti
   const { mutate: updateStatus, isPending: isUpdating } = useMutation({
     mutationFn: TournamentService.update, //funzione che chiama l'endpoint per aggiungere il giocatore
-    onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
-    },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Abbinamenti generati correttamente");
+      setOpenUpdateForm(false);
+      toast.success("Abbinamenti generati correttamente!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
         queryKey: ["tournament", { id: +id! }],
@@ -135,7 +134,9 @@ const TournamentPage = () => {
           {/* Quando il numero di partecipanti non è raggiunto, il bottone deve essere visibile */}
           {tournament?.status === "draft" && (
             <CreateDialog
-              disabled={tournament?.participantsNumber === teamTournament.length}
+              disabled={
+                tournament?.participantsNumber === teamTournament.length
+              }
               text="Iscrivi squadra"
               children={
                 <TeamTournamentForm

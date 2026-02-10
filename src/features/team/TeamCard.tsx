@@ -15,10 +15,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TeamService } from "./team.service";
 import UpdateDialog from "@/components/UpdateDialog";
 import TeamForm from "./TeamForm";
+import { toast } from "sonner";
 
 const TeamCard = ({ item }: { item: Team }) => {
   const DialogContext = useDialogContext();
-  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+  const { setOpenUpdateForm, setOpenDeleteForm } = DialogContext;
 
   const queryClient = useQueryClient();
 
@@ -26,15 +27,13 @@ const TeamCard = ({ item }: { item: Team }) => {
   const { mutate: deleteTeam, isPending: isDeleting } = useMutation({
     mutationFn: TeamService.delete, //funzione che chiama l'endpoint per eliminare un torneo
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenDeleteForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Squadra eliminata con successo!");
+      toast.success("Giocatore eliminato con successo!", { position: "bottom-right" });
       queryClient.invalidateQueries({
         //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo l'eliminazione di una squadra
         queryKey: ["teams"],
@@ -46,13 +45,11 @@ const TeamCard = ({ item }: { item: Team }) => {
   const { mutate: updateTeam, isPending: isUpdating } = useMutation({
     mutationFn: TeamService.update, //funzione che chiama l'endpoint per aggiornare un torneo
     onError: (error: Error) => {
-      setMessage(error.message);
-      setOpenDialog(true);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Squadra aggiornata con successo!");
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenUpdateForm(false);
+      toast.success("Squadra aggiornata con successo!", { position: "bottom-right" });
       queryClient.invalidateQueries({
         //invalidazione della query delle squadre per rifetchare la lista aggiornata dopo l'aggiornamento di una squadra
         queryKey: ["teams"],

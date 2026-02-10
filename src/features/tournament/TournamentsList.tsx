@@ -8,6 +8,7 @@ import { useDialogContext } from "@/contexts/DialogContext";
 import EmptyError from "@/components/EmptyError";
 import type { Tournament } from "./tournament.type";
 import EmptyResult from "@/components/EmptyResult";
+import { toast } from "sonner";
 
 const TournamentsList = () => {
   const {
@@ -21,22 +22,17 @@ const TournamentsList = () => {
     queryFn: () => TournamentService.list(),
   });
 
-  const { setOpenDialog, setMessage /* setOpenForm */ } = useDialogContext();
+  const { setOpenForm } = useDialogContext();
 
   const queryClient = useQueryClient(); //essenziqale per invalidare la query dei giocatori dopo la creazione di un nuovo giocatore
   const { mutate: createTournament, isPending: isCreating } = useMutation({
     mutationFn: TournamentService.create, //funzione che chiama l'endpoint per creare un giocatore
-    onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
-    },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Torneo creato con successo!");
-      /* setOpenForm(false); */
+      toast.success("Torneo creato con successo!", { position: "bottom-right" });
+      setOpenForm(false);
       queryClient.invalidateQueries({
         //invalidazione della query dei tornei per rifetchare la lista aggiornata dopo la creazione di un nuovo torneo
         queryKey: ["tournaments"],
@@ -71,7 +67,9 @@ const TournamentsList = () => {
           title="Nessuno torneo trovato"
           description="Al momento non ci sono tornei salvati nel database"
           text="Crea torneo"
-          children={ <TournamentForm isPending={isCreating} mutate={createTournament} />}
+          children={
+            <TournamentForm isPending={isCreating} mutate={createTournament} />
+          }
         />
       )}
 

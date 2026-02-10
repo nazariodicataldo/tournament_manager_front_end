@@ -10,11 +10,11 @@ import { Loader2 } from "lucide-react";
 const schema = z
   .object({
     goalA: z
-      .number()
+      .number({ error: "Devi inserire un punteggio valido" })
       .min(0, "La squadra non può segnare meno di 0 gol")
       .max(10, "La squadra non può segnare più di 10 gol"),
     goalB: z
-      .number()
+      .number({ error: "Devi inserire un punteggio valido" })
       .min(0, "La squadra non può segnare meno di 0 gol")
       .max(10, "La squadra non può segnare più di 10 gol"),
   })
@@ -65,14 +65,11 @@ const GameForm = ({ mutate, isPending, game }: GameFormProps) => {
 
       {/* Goal squadra A */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="goalA" className="font-medium">
-          Goal segnati dalla squadra A
+        <label htmlFor="goalA" className="font-medium flex gap-1">
+          Goal segnati dalla squadra A<span className="text-red-400">*</span>
         </label>
         <Input
           id="goalA"
-          min={0}
-          max={10}
-          type="number"
           {...register("goalA", { valueAsNumber: true })}
           placeholder="1"
         />
@@ -85,14 +82,11 @@ const GameForm = ({ mutate, isPending, game }: GameFormProps) => {
 
       {/* Goal squadra B */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="goalB" className="font-medium">
-          Goal segnati dalla squadra B
+        <label htmlFor="goalB" className="font-medium flex gap-1">
+          Goal segnati dalla squadra B<span className="text-red-400">*</span>
         </label>
         <Input
           id="number"
-          min={0}
-          max={10}
-          type="number"
           {...register("goalB", { valueAsNumber: true })}
           placeholder="1"
         />

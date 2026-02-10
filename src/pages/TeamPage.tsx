@@ -13,6 +13,7 @@ import { capitalizeFirstLetter } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Shirt } from "lucide-react";
 import { Link, useParams } from "react-router";
+import { toast } from "sonner";
 
 const TeamPage = () => {
   //Mi prendo l'id del team dai parametri dell'url
@@ -32,7 +33,7 @@ const TeamPage = () => {
 
   const DialogContext = useDialogContext();
 
-  const { setOpenDialog, setMessage /* setOpenForm  */ } = DialogContext;
+  const { setOpenForm, setOpenDeleteForm } = DialogContext;
 
   const queryClient = useQueryClient();
 
@@ -40,15 +41,15 @@ const TeamPage = () => {
   const { mutate: detachPlayer, isPending: isDetaching } = useMutation({
     mutationFn: PlayerService.update, //funzione che chiama l'endpoint per rimuovere il giocatore
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenDeleteForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Giocatore rimosso con successo!");
+      toast.success("Giocatore rimosso con successo!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
         queryKey: ["teams", { id: +id! }],
@@ -60,15 +61,15 @@ const TeamPage = () => {
   const { mutate: addPlayer, isPending: isAdding } = useMutation({
     mutationFn: PlayerService.update, //funzione che chiama l'endpoint per aggiungere il giocatore
     onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
+      setOpenForm(false);
     },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Giocatore aggiunto con successo!");
+      toast.success("Giocatore aggiunto con successo!", {
+        position: "bottom-right",
+      });
       queryClient.invalidateQueries({
         //invalidazione della query dei giocatori per rifetchare la lista aggiornata dopo l'eliminazione di un giocatore
         queryKey: ["teams", { id: +id! }],
@@ -86,14 +87,14 @@ const TeamPage = () => {
           <ArrowLeft size={20} />
           Torna alle squadre
         </Link>
-        <h1 style={{ color: team?.color }} className="text-2xl font-semibold">
+        <h1 className="text-2xl font-semibold">
           {isPending ? <Skeleton className="w-32 h-8" /> : `${team?.name}`}
         </h1>
       </header>
 
       <section className="flex flex-col gap-4 w-full">
         <div className="flex items-center justify-between gap-2">
-          <h2 style={{ color: team?.color }} className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold">
             Lista di giocatori ({team?.players!.length || 0})
           </h2>
 
@@ -167,10 +168,7 @@ const TeamPage = () => {
                     />
                   </div>
                 </div>
-                <p
-                  style={{ color: team?.color }}
-                  className="flex items-center text-[16px] w-full gap-1 pt-3 border-t border-b-neutral-500"
-                >
+                <p className="flex items-center text-[16px] w-full gap-1 pt-3 border-t border-b-neutral-500">
                   <Shirt size={20} /> {player.number}
                 </p>
               </div>

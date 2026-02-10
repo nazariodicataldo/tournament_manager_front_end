@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import MessageDialog from "./MessageDialog";
 import { useDialogContext } from "@/contexts/DialogContext";
 
 export type CreateDialogProps = {
@@ -12,12 +11,12 @@ export type CreateDialogProps = {
 
 const CreateDialog = ({ text, children, disabled }: CreateDialogProps) => {
   //Uso del contesto per gestire lo stato della dialog e il messaggio
-  /* const { openForm, setOpenForm } =   useDialogContext(); */
+  const { openForm, setOpenForm } =   useDialogContext();
 
   return (
     <>
       {/* Dialog che contiene il form */}
-      <Dialog /* open={openForm} onOpenChange={setOpenForm} */>
+      <Dialog open={openForm} onOpenChange={setOpenForm}>
         <DialogTrigger
           nativeButton={false}
           render={
@@ -29,9 +28,6 @@ const CreateDialog = ({ text, children, disabled }: CreateDialogProps) => {
         />
         <DialogContent className="sm:max-w-md">{children}</DialogContent>
       </Dialog>
-
-      {/* Dialog di messaggio dopo l'invio del form   */}
-      <MessageDialog />
     </>
   );
 };

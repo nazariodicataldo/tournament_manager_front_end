@@ -4,13 +4,17 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TeamService } from "../team/team.service";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
 import { useQuery } from "@tanstack/react-query";
-import { capitalizeFirstLetter } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { capitalizeFirstLetter } from "@/lib/utils";
 
 /* Mi creo lo scheme della validazione */
 const schema = z.object({
@@ -27,21 +31,35 @@ const schema = z.object({
     "Ruolo non valido",
   ),
   number: z
-    .number("Devi inserire un numero di maglia")
-    .min(1, "Il numero deve essere almeno 1")
-    .max(99, "Il numero non può superare 99"),
-  teamId: z.number().min(1, "Devi selezionare una squadra"),
+    .number({ error: "Devi selezionare un numero di maglia valido" })
+    .min(1)
+    .max(99)
+    .optional(),
+  /*     .min(1, "Il numero deve essere almeno 1")
+    .max(99, "Il numero non può superare 99"), */
+  teamId: z.number().optional(),
 });
 
 /* Mi creo il tipo dato dallo schema di validazione */
 export type PlayerFormType = z.infer<typeof schema>;
 
 //Ruoli disponibili
-const roles = ["portiere", "difensore", "centrocampista", "attaccante"];
+const roles = [
+  { value: "portiere", label: "Portiere" },
+  { value: "difensore", label: "Difensore" },
+  { value: "centrocampista", label: "Centrocampista" },
+  { value: "attaccante", label: "Attaccante" },
+];
 
 //Tipo delle props del componente
 type PlayerFormProps = {
-  mutate: ({ data, id }: { data: Omit<PlayerFormType, "id">; id?: number }) => void;
+  mutate: ({
+    data,
+    id,
+  }: {
+    data: Omit<PlayerFormType, "id">;
+    id?: number;
+  }) => void;
   isPending?: boolean;
   defaultValues?: PlayerFormType & { id: number };
 };
@@ -57,6 +75,8 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<PlayerFormType>({
     resolver: zodResolver(schema), //collego zod a react hook form
@@ -77,8 +97,9 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
 
         {/* First name */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="firstName" className="font-medium">
+          <label htmlFor="firstName" className="font-medium flex gap-1">
             Nome
+            <span className="text-red-400">*</span>
           </label>
           <Input
             id="firstName"
@@ -94,8 +115,9 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
 
         {/* Last name */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="lastName" className="font-medium">
+          <label htmlFor="lastName" className="font-medium flex gap-1">
             Cognome
+            <span className="text-red-400">*</span>
           </label>
           <Input id="lastName" {...register("lastName")} placeholder="Rossi" />
           {errors.lastName && (
@@ -107,16 +129,41 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
 
         {/* Role */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="role" className="font-medium">
+          <label htmlFor="role" className="font-medium flex gap-1">
             Ruolo
+            <span className="text-red-400">*</span>
           </label>
-          <NativeSelect className="w-full" id="role" {...register("role")}>
-            {roles.map((role) => (
-              <NativeSelectOption key={role} value={role}>
-                {capitalizeFirstLetter(role)}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+          <>
+            <Select
+              onValueChange={(value) => {
+                if (value) {
+                  setValue(
+                    "role",
+                    value as
+                      | "portiere"
+                      | "difensore"
+                      | "centrocampista"
+                      | "attaccante",
+                  );
+                }
+              }}
+              items={roles}
+              id="role"
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleziona ruolo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {roles.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </>
           {errors.role && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.role.message}
@@ -129,18 +176,35 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
           <label htmlFor="teamId" className="font-medium">
             Squadra
           </label>
-          <NativeSelect
-            className="w-full"
-            id="teamId"
-            {...register("teamId", { valueAsNumber: true })}
-          >
-            <NativeSelectOption value={0}>Seleziona squadra</NativeSelectOption>
-            {teams.map((team) => (
-              <NativeSelectOption key={team.id} value={team.id}>
-                {team.name}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+          <>
+            <Select
+              onValueChange={(value) => {
+                if (value) {
+                  setValue("teamId", parseInt(value as string));
+                }
+              }}
+              items={teams.map((team) => ({
+                label: team.name,
+                value: team.id,
+              }))}
+              id="team"
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleziona squadra" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {teams
+                    .map((team) => ({ label: team.name, value: team.id }))
+                    .map((team) => (
+                      <SelectItem key={team.value} value={team.value}>
+                        {capitalizeFirstLetter(team.label)}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </>
           {errors.teamId && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.teamId.message}
@@ -149,24 +213,23 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
         </div>
 
         {/* Number */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="number" className="font-medium">
-            Numero di maglia
-          </label>
-          <Input
-            min={1}
-            max={99}
-            type="number"
-            id="number"
-            {...register("number", { valueAsNumber: true })}
-            placeholder="1"
-          />
-          {errors.number && (
-            <p className="text-sm text-red-400" aria-live="polite">
-              {errors.number.message}
-            </p>
-          )}
-        </div>
+        {(watch("teamId") || defaultValues?.teamId) && (
+          <div className="flex flex-col gap-1">
+            <label htmlFor="number" className="font-medium">
+              Numero di maglia
+            </label>
+            <Input
+              id="number"
+              {...register("number", { valueAsNumber: true })}
+              placeholder="1"
+            />
+            {errors.number && (
+              <p className="text-sm text-red-400" aria-live="polite">
+                {errors.number.message}
+              </p>
+            )}
+          </div>
+        )}
 
         <Button
           disabled={isPending}

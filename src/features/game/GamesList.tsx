@@ -6,11 +6,12 @@ import { capitalizeFirstLetter, cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import UpdateDialog from "@/components/UpdateDialog";
 import GameForm from "./GameForm";
-import { useDialogContext } from "@/contexts/DialogContext";
+/* import { useDialogContext } from "@/contexts/DialogContext"; */
 import { GameService } from "./game.service";
 import type { Game } from "./game.type";
 import { Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const GamesList = ({
   tournament,
@@ -38,23 +39,20 @@ const GamesList = ({
     queryFn: () => TournamentService.rounds(tournament.id),
   });
 
-  const { setOpenDialog, setMessage /* setOpenForm */ } = useDialogContext();
+  //const { setOpenForm } = useDialogContext();
 
   const queryClient = useQueryClient(); //ci prendiamo il query client per aggiornare la dashbard quando una partita termina
 
   //Mutation per modificare i goal delle due squadre e drecretare il vincitore
   const { mutate: updateGame, isPending: isUpdating } = useMutation({
     mutationFn: GameService.update, //funzione che chiama l'endpoint per aggiungere il giocatore
-    onSettled: () => {
-      //qualunque sia l'esito della mutation, mostro la dialog di messaggio e chiudo il form
-      /* setOpenForm(false); */
-      setOpenDialog(true);
-    },
     onError: (error: Error) => {
-      setMessage(error.message);
+      toast.error(error.message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      setMessage("Risultato della partita cambiato correttamente");
+      toast.success("Risultato della partita cambiato correttamente!", {
+        position: "bottom-right",
+      });
       refetch();
       queryClient.invalidateQueries({
         //invalidazione della query con le statistiche del torneo
@@ -147,6 +145,7 @@ const GamesList = ({
                             )}
                             {/* Se è la finale e la Squadra A è la vincitrice, aggiungo l'icona del trofeo  */}
                             {game.round === "finale" &&
+                              game.winnerId && //verifico anche winnerId non sia null
                               game.teamAId === game.winnerId && (
                                 <Trophy size={20} strokeWidth={1.5} />
                               )}
@@ -186,7 +185,8 @@ const GamesList = ({
                             )}
                             {/* Se è la finale e la Squadra B è la vincitrice, aggiungo l'icona del trofeo  */}
                             {game.round === "finale" &&
-                              game.teamBId === game.winnerId && (
+                              game.teamBId === game.winnerId &&
+                              game.winnerId && (
                                 <Trophy size={20} strokeWidth={1.5} />
                               )}
                           </span>

@@ -4,18 +4,17 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-/* import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox"; */
 import { useQuery } from "@tanstack/react-query";
 import { PlayerService } from "../player/player.service";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { capitalizeFirstLetter } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /* Mi creo lo scheme della validazione */
 const schema = z.object({
@@ -32,7 +31,7 @@ type FormType = z.infer<typeof schema>;
 export type MutationArgs = {
   data: Omit<FormType, "playerId"> & { teamId: number };
   id?: number;
-}
+};
 
 //Tipo delle props del componente
 type TeamFormProps = {
@@ -46,20 +45,24 @@ const PlayerTeamForm = ({ mutate, isPending, teamId }: TeamFormProps) => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormType>({
     resolver: zodResolver(schema), //collego zod a react hook form
   });
 
   //Query per prendere i dati del team specifico
-  const { data: players = [] } = useQuery({
+  const { data: players = [], isPending: isLoading } = useQuery({
     queryKey: ["player_team", { id: +teamId! }],
     queryFn: () => PlayerService.free_agents(),
   });
 
   //funzione chiamata alla submit del form, che esegue la mutation per creare un nuovo giocatore
   function handleActionTeam(data: FormType) {
-    mutate({id: data.playerId, data: {teamId: +teamId, number: data.number}});  //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
+    mutate({
+      id: data.playerId,
+      data: { teamId: +teamId, number: data.number },
+    }); //data contiene i valori del form, che vengono passati alla mutation per creare un nuovo giocatore
   }
 
   return (
@@ -71,62 +74,54 @@ const PlayerTeamForm = ({ mutate, isPending, teamId }: TeamFormProps) => {
 
         {/* Players */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="playerId" className="font-medium">
+          <label htmlFor="playerId" className="font-medium flex gap-1">
             Giocatore
+            <span className="text-red-400">*</span>
           </label>
-          <NativeSelect className="w-full" id="playerId" {...register("playerId", { valueAsNumber: true })}>
-            {players.map(player => (
-              <NativeSelectOption key={player.id} value={player.id.toString()}>
-                {capitalizeFirstLetter(player.firstName)} {capitalizeFirstLetter(player.lastName)}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+          <Select
+            onValueChange={(value) => {
+              if (value) {
+                setValue("playerId", parseInt(value as string));
+              }
+            }}
+            items={players.map((player) => ({
+              label: `${player.firstName} ${player.lastName}`,
+              value: player.id,
+            }))}
+            id="team"
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleziona giocatore" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {!isLoading &&
+                  players
+                    .map((player) => ({
+                      label: `${player.firstName} ${player.lastName}`,
+                      value: player.id,
+                    }))
+                    .map((player) => (
+                      <SelectItem key={player.value} value={player.value}>
+                        {capitalizeFirstLetter(player.label)}
+                      </SelectItem>
+                    ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
           {errors.playerId && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.playerId.message}
             </p>
           )}
         </div>
-        {/* <div className="flex flex-col gap-1">
-          <label htmlFor="playerId" className="font-medium">
-            Giocatore
-          </label>
-          <Combobox
-            value={"ciao"}
-            onValueChange={(val) =>
-              val !== null &&
-              setValue("playerId", parseInt(val), { shouldDirty: true })
-            } //quando cambio il valore del combobox, aggiorno il valore di playerId in react-hook-form con l'id del giocatore selezionato
-            items={players.map((p) => ({
-              label: `${p.firstName} ${p.lastName}`,
-              value: p.id.toString(),
-            }))}
-            id="playerId"
-            {...register("playerId")}
-          >
-            <ComboboxInput placeholder="Seleziona un giocatore" showClear />
-            <ComboboxContent>
-              <ComboboxEmpty>Giocatore non trovato</ComboboxEmpty>
-              <ComboboxList>
-                {(player) => (
-                  <ComboboxItem key={player.value} value={player.value}>
-                    {player.label}
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
-          {errors.playerId && (
-            <p className="text-sm text-red-400" aria-live="polite">
-              {errors.playerId.message}
-            </p>
-          )}
-        </div> */}
 
         {/* Number */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="number" className="font-medium">
+          <label htmlFor="number" className="font-medium flex gap-1">
             Numero di maglia
+            <span className="text-red-400">*</span>
           </label>
           <Input
             id="number"
