@@ -8,7 +8,7 @@ const MainLayout = () => {
     <>
       <SidebarProvider open={false}>
         <AppSidebar />
-        <main className="min-h-screen container mx-auto flex flex-col gap-12 mb-12">
+        <main className="min-h-screen container mx-auto flex flex-col gap-12 mb-20">
           <Outlet />
         </main>
         {/* Toast con messaggio dopo un' azione */}

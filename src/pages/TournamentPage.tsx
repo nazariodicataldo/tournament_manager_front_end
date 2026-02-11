@@ -113,7 +113,7 @@ const TournamentPage = () => {
 
   return (
     <>
-      <header className="mt-8 grid grid-cols-3">
+      <header className="mt-8 grid grid-cols-2 md:grid-cols-3">
         <Link
           to={"/tournaments"}
           className="flex items-center gap-1 text-primary underline"
@@ -207,7 +207,7 @@ const TournamentPage = () => {
           {/* Rendering condizionale delle statistiche */}
           {/* Loading con skeleton */}
           {tournament && tournament.status !== "draft" && fetchingDashboard && (
-            <Skeleton className="w-md h-max" />
+            <Skeleton className="w-full h-max" />
           )}
 
           {/* Mostro le statistiche */}

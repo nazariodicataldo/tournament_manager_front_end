@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 
+
 const NotFoundPage = () => {
   return (
     <main className="container mx-auto bg-background flex flex-col gap-4 items-center justify-center min-h-screen text-primary">

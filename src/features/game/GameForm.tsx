@@ -66,7 +66,8 @@ const GameForm = ({ mutate, isPending, game }: GameFormProps) => {
       {/* Goal squadra A */}
       <div className="flex flex-col gap-1">
         <label htmlFor="goalA" className="font-medium flex gap-1">
-          Goal segnati dalla squadra A<span className="text-red-400">*</span>
+          Goal segnati da {game.teamA?.name}
+          <span className="text-red-400">*</span>
         </label>
         <Input
           id="goalA"
@@ -83,7 +84,8 @@ const GameForm = ({ mutate, isPending, game }: GameFormProps) => {
       {/* Goal squadra B */}
       <div className="flex flex-col gap-1">
         <label htmlFor="goalB" className="font-medium flex gap-1">
-          Goal segnati dalla squadra B<span className="text-red-400">*</span>
+          Goal segnati da {game.teamB?.name}
+          <span className="text-red-400">*</span>
         </label>
         <Input
           id="number"

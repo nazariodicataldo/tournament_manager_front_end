@@ -12,6 +12,7 @@ import type { Game } from "./game.type";
 import { Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { useDialogContext } from "@/contexts/DialogContext";
 
 const GamesList = ({
   tournament,
@@ -39,7 +40,7 @@ const GamesList = ({
     queryFn: () => TournamentService.rounds(tournament.id),
   });
 
-  //const { setOpenForm } = useDialogContext();
+  const { setOpenUpdateForm } = useDialogContext();
 
   const queryClient = useQueryClient(); //ci prendiamo il query client per aggiornare la dashbard quando una partita termina
 
@@ -53,6 +54,7 @@ const GamesList = ({
       toast.success("Risultato della partita cambiato correttamente!", {
         position: "bottom-right",
       });
+      setOpenUpdateForm(false);
       refetch();
       queryClient.invalidateQueries({
         //invalidazione della query con le statistiche del torneo
@@ -94,7 +96,7 @@ const GamesList = ({
       {fetchingGames &&
         new Array(4)
           .fill("")
-          .map((_, pos) => <Skeleton key={pos} className="w-[384px] h-32" />)}
+          .map((_, pos) => <Skeleton key={pos} className="w-full h-32" />)}
 
       {!fetchingGames &&
         rounds.map((round) => (

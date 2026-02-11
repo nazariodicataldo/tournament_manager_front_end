@@ -195,7 +195,7 @@ const TournamentCard = ({ item }: { item: Tournament }) => {
             {/* Mostro le squadre iscritte e il numero massimo di partecipanti */}
             {!fetchngTeam && (
               <p className="flex text-sm text-neutral-500 items-center gap-1">
-                <Users size={20} /> {teams.length} /{item.participantsNumber}{" "}
+                <Users size={20} /> {teams.length} / {item.participantsNumber}{" "}
                 squadre
               </p>
             )}

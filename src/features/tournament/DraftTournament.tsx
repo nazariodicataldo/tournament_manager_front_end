@@ -34,8 +34,8 @@ const DraftTournament = ({
   isUpdating,
 }: DraftTournamentProps) => {
   return (
-    <div>
-      <AnimatedList className="mt-4 min-h-[50vh]">
+    <div className="w-full">
+      <AnimatedList className="mt-4">
         {teamTournament?.reverse().map((t) => (
           <div className="bg-secondary p-4 rounded-lg flex gap-2 items-center justify-between">
             <h3 className="font-semibold">{t.team.name}</h3>

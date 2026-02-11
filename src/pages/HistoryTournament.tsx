@@ -1,6 +1,5 @@
 import EmptyError from "@/components/EmptyError";
 import EmptyResult from "@/components/EmptyResult";
-import { AnimatedList } from "@/components/ui/animated-list";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TournamentService } from "@/features/tournament/tournament.service";
@@ -52,7 +51,7 @@ const HistoryTournament = () => {
       )}
 
       {!isPending && !isError && (
-        <AnimatedList className="mt-4 min-h-[50vh] w-full flex flex-col">
+        <div className="mt-4 min-h-[50vh] w-full flex gap-10 flex-col">
           {tournaments.map((tournament) => (
             <Card key={tournament.id} className="relative">
               <CardContent className="flex justify-between items-center">
@@ -91,7 +90,7 @@ const HistoryTournament = () => {
               </CardFooter>
             </Card>
           ))}
-        </AnimatedList>
+        </div>
       )}
     </>
   );

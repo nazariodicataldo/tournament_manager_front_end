@@ -4,25 +4,18 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { capitalizeFirstLetter } from "@/lib/utils";
 import { TeamTournamentService } from "./teamTournament.service";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { MultiSelectCombobox } from "@/components/MultiSelectCombox";
 
 /* Mi creo lo scheme della validazione */
-const schema = z.object({
-  teamId: z
-    .array(z.number().positive(), {
-      error: "Devi selezionare almeno una squadra",
-    })
-    .min(1, "Devi selezionare almeno una squadra"),
-});
+const schema = z
+  .object({
+    teamId: z
+      .array(z.number().positive(), {
+        error: "Array vuoto",
+      })
+      .min(1, "Devi selezionare almeno una squadra"),
+  })
 
 /* Mi creo il tipo dato dallo schema di validazione */
 type FormType = z.infer<typeof schema>;
@@ -46,7 +39,7 @@ const TeamTournamentForm = ({
   isPending,
 }: TeamTournamentFormProps) => {
   //Query per prendere tutte le squadre e mostrarle nel select del form
-  const { data: teams = [], isPending: isLoading } = useQuery({
+  const { data: teams = [] } = useQuery({
     queryKey: ["free_teems", { id: tournamentId }],
     queryFn: () => TeamTournamentService.free_teams(+tournamentId),
   });
@@ -54,6 +47,7 @@ const TeamTournamentForm = ({
   //Mi prendo le funzioni di react-hook-form
   const {
     handleSubmit,
+    watch,
     setValue,
     formState: { errors },
   } = useForm<FormType>({
@@ -82,33 +76,19 @@ const TeamTournamentForm = ({
             Squadra
             <span className="text-red-400">*</span>
           </label>
-          <Select
-            multiple
-            onValueChange={(value) => {
-              if (value) {
-                setValue("teamId", [...value] as number[]);
+          <>
+            <MultiSelectCombobox
+              teams={teams}
+              value={watch("teamId") || []}
+              onBlur={(value) =>
+                setValue("teamId", value, { shouldValidate: true })
               }
-            }}
-            items={teams.map((team) => ({ label: team.name, value: team.id }))}
-            id="team"
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleziona squadra" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {!isLoading &&
-                  teams
-                    .map((team) => ({ label: team.name, value: team.id }))
-                    .map((team) => (
-                      <SelectItem key={team.value} value={team.value}>
-                        {capitalizeFirstLetter(team.label)}
-                      </SelectItem>
-                    ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {errors.teamId && (
+              placeholder="Seleziona squadre..."
+              searchPlaceholder="Cerca squadra..."
+              className="w-full"
+            />
+          </>
+          {errors.teamId && errors.teamId.message !== "Array vuoto" && (
             <p className="text-sm text-red-400" aria-live="polite">
               {errors.teamId.message}
             </p>

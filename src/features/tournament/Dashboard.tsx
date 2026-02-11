@@ -11,7 +11,7 @@ const Dashboard = ({
   dashboard: TournamentDashboard;
   tournament?: Tournament;
 }) => {
-  console.log(dashboard);
+
   return (
     <Card className="w-full md:max-w-md h-max">
       <CardHeader>

@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation();
   return (
     <Sidebar {...props} collapsible="icon">
-      <SidebarHeader className="px-4 flex flex-row items-center">
+      <SidebarHeader className="px-4 flex flex-row justify-center items-center">
         <img src="/logo.svg" width={32} />
       </SidebarHeader>
       <SidebarContent>

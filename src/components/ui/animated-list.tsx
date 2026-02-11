@@ -29,7 +29,7 @@ export interface AnimatedListProps extends ComponentPropsWithoutRef<"div"> {
 }
 
 export const AnimatedList = React.memo(
-  ({ children, className, delay = 1000, ...props }: AnimatedListProps) => {
+  ({ children, className, delay = 800, ...props }: AnimatedListProps) => {
     const [index, setIndex] = useState(0)
     const childrenArray = useMemo(
       () => React.Children.toArray(children),
@@ -53,7 +53,7 @@ export const AnimatedList = React.memo(
 
     return (
       <div
-        className={cn(`grid grid-cols-4 gap-8`, className)}
+        className={cn(`grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 h-max`, className)}
         {...props}
       >
         <AnimatePresence>

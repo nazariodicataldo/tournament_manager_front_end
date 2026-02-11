@@ -76,7 +76,7 @@ const TeamsList = () => {
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Stato Loading */}
         {isPending &&
-          new Array(8)
+          new Array(16)
             .fill("")
             .map((_, pos) => (
               <Skeleton key={pos} className="max-w-sm aspect-video" />

@@ -55,7 +55,7 @@ function DeleteDialog({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Annulla</AlertDialogCancel>
             <AlertDialogAction
               variant={"destructive"}
               disabled={isPending}

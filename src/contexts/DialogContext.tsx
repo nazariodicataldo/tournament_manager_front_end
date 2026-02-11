@@ -13,14 +13,19 @@ type DialogContextProps = {
   setMessage: (message: string) => void; */
 };
 
-export const DialogContext = createContext<DialogContextProps | undefined>(undefined);
+export const DialogContext = createContext<DialogContextProps | undefined>(
+  undefined,
+);
 
 const DialogContextProvider = ({ children }: React.PropsWithChildren) => {
-  const [openForm, setOpenForm] = useState<DialogContextProps["openForm"]>(false); //Stato per l'apertura del form
+  const [openForm, setOpenForm] =
+    useState<DialogContextProps["openForm"]>(false); //Stato per l'apertura del form
   /* const [openDialog, setOpenDialog] = useState<DialogContextProps["openDialog"]>(false); */ //Stato per l'apertura della modal di messaggio
   /* const [message, setMessage] = useState<DialogContextProps["message"]>(''); */ //stato che salva il messaggio da mostrare nella modal
-  const [openDeleteForm, setOpenDeleteForm] = useState<DialogContextProps["openDeleteForm"]>(false); //Stato per l'apertura del form di eliminazione
-  const [openUpdateForm, setOpenUpdateForm] = useState<DialogContextProps["openUpdateForm"]>(false); //Stato per l'apertura del form di aggiornamento
+  const [openDeleteForm, setOpenDeleteForm] =
+    useState<DialogContextProps["openDeleteForm"]>(false); //Stato per l'apertura del form di eliminazione
+  const [openUpdateForm, setOpenUpdateForm] =
+    useState<DialogContextProps["openUpdateForm"]>(false); //Stato per l'apertura del form di aggiornamento
 
   return (
     <DialogContext.Provider
@@ -45,10 +50,12 @@ const DialogContextProvider = ({ children }: React.PropsWithChildren) => {
 export default DialogContextProvider;
 
 export function useDialogContext() {
-    const context = useContext(DialogContext);
+  const context = useContext(DialogContext);
 
-    if (!context) {
-        throw new Error("useDialogContext deve essere dentro un DialogContextProvider");
-    }
-    return context;
+  if (!context) {
+    throw new Error(
+      "useDialogContext deve essere dentro un DialogContextProvider",
+    );
+  }
+  return context;
 }

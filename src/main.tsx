@@ -13,12 +13,10 @@ import TeamPage from "./pages/TeamPage";
 import HistoryTournament from "./pages/HistoryTournament";
 import NotFoundPage from "./pages/NotFoundPage";
 
-
 // This code is only for TypeScript
 declare global {
   interface Window {
-    __TANSTACK_QUERY_CLIENT__:
-      import("@tanstack/query-core").QueryClient;
+    __TANSTACK_QUERY_CLIENT__: import("@tanstack/query-core").QueryClient;
   }
 }
 
@@ -79,8 +77,8 @@ const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <NotFoundPage />
-  }
+    element: <NotFoundPage />,
+  },
 ]);
 
 const queryClient = new QueryClient({});
