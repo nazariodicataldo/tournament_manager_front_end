@@ -188,7 +188,7 @@ const TournamentPage = () => {
           {/* Sezione visibile solo quando il torneo non è ancora iniziato e quindi è nello status 'draft' */}
           {tournament?.status === "draft" && (
             <DraftTournament
-              tournamentId={+id!}
+              tournament={tournament}
               teamTournament={teamTournament}
               removeTeam={removeTeam}
               isRemoving={isRemoving}

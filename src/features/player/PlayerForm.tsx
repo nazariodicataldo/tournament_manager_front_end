@@ -32,8 +32,8 @@ const schema = z.object({
   ),
   number: z
     .number({ error: "Devi selezionare un numero di maglia valido" })
-    .min(1)
-    .max(99)
+    .min(1, {message: "Il numero minimo è 1"})
+    .max(99, {message: "Il numero massimo è 99"})
     .optional(),
   /*     .min(1, "Il numero deve essere almeno 1")
     .max(99, "Il numero non può superare 99"), */
@@ -149,6 +149,7 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
               }}
               items={roles}
               id="role"
+              defaultValue={defaultValues?.role}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleziona ruolo" />
@@ -188,6 +189,9 @@ const PlayerForm = ({ mutate, defaultValues, isPending }: PlayerFormProps) => {
                 value: team.id,
               }))}
               id="team"
+              defaultValue={
+                teams.find((team) => team.id === defaultValues?.teamId)?.name
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleziona squadra" />

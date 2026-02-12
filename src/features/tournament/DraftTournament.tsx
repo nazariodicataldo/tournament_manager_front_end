@@ -5,7 +5,7 @@ import type { TeamTournament } from "../teamTournaments/teamTournament.type";
 import type { Tournament } from "./tournament.type";
 
 type DraftTournamentProps = {
-  tournamentId: number;
+  tournament: Tournament;
   teamTournament?: TeamTournament[];
   removeTeam: ({
     teamId,
@@ -26,7 +26,7 @@ type DraftTournamentProps = {
 };
 
 const DraftTournament = ({
-  tournamentId,
+  tournament,
   teamTournament,
   removeTeam,
   isRemoving,
@@ -45,7 +45,7 @@ const DraftTournament = ({
               onClick={() =>
                 removeTeam({
                   teamId: t.teamId,
-                  tournamentId: tournamentId,
+                  tournamentId: tournament.id,
                 })
               }
             >
@@ -61,10 +61,12 @@ const DraftTournament = ({
       <div className="flex justify-end w-full mt-16">
         <Button
           size={"lg"}
-          disabled={isUpdating}
+          disabled={
+            isUpdating || (tournament.participantsNumber > teamTournament!.length)
+          }
           onClick={() =>
             updateStatus({
-              id: tournamentId,
+              id: tournament.id,
               data: { status: "ready" },
             })
           }

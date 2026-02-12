@@ -1,0 +1,2 @@
+Front-End: https://github.com/nazariodicataldo/tournament_manager_front_end
+Back-End: https://github.com/nazariodicataldo/tournament_manager_back_end

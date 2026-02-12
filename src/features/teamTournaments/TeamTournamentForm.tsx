@@ -6,16 +6,16 @@ import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { TeamTournamentService } from "./teamTournament.service";
 import { MultiSelectCombobox } from "@/components/MultiSelectCombox";
+import type { Team } from "../team/team.type";
 
 /* Mi creo lo scheme della validazione */
-const schema = z
-  .object({
-    teamId: z
-      .array(z.number().positive(), {
-        error: "Array vuoto",
-      })
-      .min(1, "Devi selezionare almeno una squadra"),
-  })
+const schema = z.object({
+  teamId: z
+    .array(z.number().positive(), {
+      error: "Array vuoto",
+    })
+    .min(1, "Devi selezionare almeno una squadra"),
+});
 
 /* Mi creo il tipo dato dallo schema di validazione */
 type FormType = z.infer<typeof schema>;
@@ -65,6 +65,16 @@ const TeamTournamentForm = ({
     });
   }
 
+  function compare(a: Team, b: Team) {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  }
+
   return (
     <>
       <form onSubmit={handleSubmit(handleActionTeam)} className="space-y-4">
@@ -78,7 +88,7 @@ const TeamTournamentForm = ({
           </label>
           <>
             <MultiSelectCombobox
-              teams={teams}
+              teams={teams.sort(compare)}
               value={watch("teamId") || []}
               onBlur={(value) =>
                 setValue("teamId", value, { shouldValidate: true })
